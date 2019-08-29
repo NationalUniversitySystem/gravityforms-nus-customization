@@ -19,6 +19,7 @@ class National_University_Gravityforms {
 	 */
 	public function __construct() {
 		add_action( 'fm_post', [ $this, 'gravity_forms_meta' ] );
+		add_filter( 'gform_field_groups_form_editor', [ $this, 'add_nu_fields_group' ] );
 	}
 
 	/**
@@ -92,5 +93,23 @@ class National_University_Gravityforms {
 
 		// Add our meta box to the side rail.
 		$fm->add_meta_box( 'Form Setup', [ 'page', 'post', 'program', 'college', 'department', 'event', 'location' ], 'side' );
+	}
+
+
+	/**
+	 * Add a custom group for our fields to keep them organized in the admin panel
+	 *
+	 * @param array $field_groups The field groups, including group name, label and fields.
+	 *
+	 * @return array
+	 */
+	public function add_nu_fields_group( $field_groups ) {
+		$field_groups['nu_fields'] = [
+			'name'   => 'nu_fields',
+			'label'  => __( 'NU Fields', 'national-university' ),
+			'fields' => [],
+		];
+
+		return $field_groups;
 	}
 }
