@@ -22,19 +22,19 @@ class Degree_Field extends GF_Field_Select {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 
-		add_filter( 'gform_pre_render', array( $this, 'populate_degree_type' ), 10, 1 );
-		add_filter( 'gform_pre_validation', array( $this, 'populate_degree_type' ), 10, 1 );
-		add_filter( 'gform_pre_submission_filter', array( $this, 'populate_degree_type' ), 10, 1 );
-		add_filter( 'gform_admin_pre_render', array( $this, 'populate_degree_type' ), 10, 1 );
+		add_filter( 'gform_pre_render', [ $this, 'populate_degree_type' ] );
+		add_filter( 'gform_pre_validation', [ $this, 'populate_degree_type' ] );
+		add_filter( 'gform_pre_submission_filter', [ $this, 'populate_degree_type' ] );
+		add_filter( 'gform_admin_pre_render', [ $this, 'populate_degree_type' ] );
 
 
 		// Ajax calls.
-		add_action( 'wp_ajax_degree_select', array( $this, 'degree_select' ) );
-		add_action( 'wp_ajax_nopriv_degree_select', array( $this, 'degree_select' ) );
+		add_action( 'wp_ajax_degree_select', [ $this, 'degree_select' ] );
+		add_action( 'wp_ajax_nopriv_degree_select', [ $this, 'degree_select' ] );
 	}
 
 	/**
@@ -53,9 +53,9 @@ class Degree_Field extends GF_Field_Select {
 	 */
 	public static function set_default_values() {
 		// Get all of our degree types as an array.
-		$degree_types = get_terms( array(
+		$degree_types = get_terms( [
 			'taxonomy' => 'degree-type',
-		) );
+		] );
 		?>
 		case "degree" :
 			field.label = "Degree Type";
@@ -182,25 +182,23 @@ class Degree_Field extends GF_Field_Select {
 				continue;
 			}
 
-			$degree_types = get_terms(
-				array(
-					'taxonomy' => 'degree-type',
-				)
-			);
+			$degree_types = get_terms( [
+				'taxonomy' => 'degree-type',
+			] );
 
-			$choices = array();
+			$choices = [];
 
 			foreach ( $degree_types as $degree_type ) {
-				$choices[] = array(
+				$choices[] = [
 					'text'  => $degree_type->name,
 					'value' => $degree_type->name,
-				);
+				];
 			}
 
-			$choices[] = array(
+			$choices[] = [
 				'text'  => 'Undecided',
 				'value' => 'Undecided',
-			);
+			];
 
 			// Update 'Select a Post' to whatever you'd like the instructive option to be.
 			$field->placeholder = 'Select a Post';
@@ -232,7 +230,7 @@ class Degree_Field extends GF_Field_Select {
 			$term = get_term_by( 'name', $degree_type, 'degree-type' );
 
 			// Setup array of current program types and their new names.
-			$new_program_names = array(
+			$new_program_names = [
 				'Associate of Arts'    => 'AA',
 				'Associate of Science' => 'AS',
 				'Bachelor of Arts'     => 'BA',
@@ -241,10 +239,10 @@ class Degree_Field extends GF_Field_Select {
 				'Master of Education'  => 'ME',
 				'Master of Fine Arts'  => 'MFA',
 				'Master of Science'    => 'MS',
-			);
+			];
 
 			// Setup our query args.
-			$args     = array(
+			$args     = [
 				'order'                  => 'ASC',
 				'orderby'                => 'title',
 				'post_type'              => 'program',
@@ -253,14 +251,14 @@ class Degree_Field extends GF_Field_Select {
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
-				'tax_query'              => array(
-					array(
+				'tax_query'              => [
+					[
 						'taxonomy' => 'degree-type',
 						'field'    => 'slug',
 						'terms'    => $term->slug,
-					),
-				),
-			);
+					],
+				],
+			];
 			$programs = new WP_Query( $args );
 
 			if ( $programs->have_posts() ) {

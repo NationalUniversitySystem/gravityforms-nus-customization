@@ -12,8 +12,8 @@ class Gf_Nus_Security {
 	 * Use class construct method to define all filters & actions
 	 */
 	public function __construct() {
-		add_filter( 'gform_save_field_value', array( $this, 'gf_custom_save_field_value' ), 10, 4 );
-		add_filter( 'gform_get_input_value', array( $this, 'gf_custom_decode_field' ), 10, 4 );
+		add_filter( 'gform_save_field_value', [ $this, 'gf_custom_save_field_value' ], 10, 4 );
+		add_filter( 'gform_get_input_value', [ $this, 'gf_custom_decode_field' ], 10, 4 );
 	}
 
 	/**

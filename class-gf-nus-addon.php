@@ -176,7 +176,7 @@ class Gf_Nus_Addon extends GFAddOn {
 	 * @return array
 	 */
 	public function tooltips( $tooltips ) {
-		$addon_tooltips = array();
+		$addon_tooltips = [];
 
 		foreach ( $this->class_names as $class_name ) {
 			if ( method_exists( $class_name, 'add_tooltip' ) ) {

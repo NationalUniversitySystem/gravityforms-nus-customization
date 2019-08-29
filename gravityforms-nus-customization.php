@@ -33,14 +33,14 @@ function gf_nus_load() {
 		return;
 	}
 
-	$files_list = array(
+	$files_list = [
 		'tracking/class-gf-nus-fb-tracking.php',
 		'inc/class-custom-validation.php',
 		'inc/class-gf-nus-javascript.php',
 		'inc/class-gf-nus-markup.php',
 		'inc/class-gf-nus-security.php',
 		'inc/class-national-university-gravityforms.php',
-	);
+	];
 
 	foreach ( $files_list as $filename ) {
 		if ( file_exists( GF_NUS_PATH . $filename ) ) {
@@ -53,7 +53,7 @@ function gf_nus_load() {
 				$class_name::singleton();
 
 				if ( method_exists( $class_name, 'activate' ) ) {
-					register_activation_hook( __FILE__, array( $class_name, 'activate' ) );
+					register_activation_hook( __FILE__, [ $class_name, 'activate' ] );
 				}
 			}
 		}

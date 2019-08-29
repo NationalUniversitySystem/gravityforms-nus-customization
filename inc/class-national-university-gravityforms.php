@@ -18,7 +18,7 @@ class National_University_Gravityforms {
 	 * Use class construct method to define all filters & actions
 	 */
 	public function __construct() {
-		add_action( 'fm_post', array( $this, 'gravity_forms_meta' ) );
+		add_action( 'fm_post', [ $this, 'gravity_forms_meta' ] );
 	}
 
 	/**
@@ -53,7 +53,7 @@ class National_University_Gravityforms {
 		// Create an array with a default null value
 		// (so if no form is needed, one is not saved by default)
 		// to add our form data into as <option>.
-		$gravity_forms = array( '' => '-- Select A Form --' );
+		$gravity_forms = [ '' => '-- Select A Form --' ];
 
 		// Loop through all the Gravity Forms data.
 		foreach ( $forms as $form ) {
@@ -66,31 +66,31 @@ class National_University_Gravityforms {
 		// Sort our forms array alphabetically for easy organization within the select.
 		asort( $gravity_forms );
 
-		$fm = new Fieldmanager_Group( array(
+		$fm = new Fieldmanager_Group( [
 			'name'           => 'form_fields', // "name" id deceiving, used as the key/ID.
 			'serialize_data' => false,
 			'add_to_prefix'  => false,
-			'children'       => array(
-				'gravity_forms_display' => new Fieldmanager_Select( 'Display Form?', array(
-					'options' => array(
+			'children'       => [
+				'gravity_forms_display' => new Fieldmanager_Select( 'Display Form?', [
+					'options' => [
 						'yes' => 'Yes',
 						'no'  => 'No',
-					),
-				) ),
-				'gravity_forms'         => new Fieldmanager_Select( 'Form', array(
+					],
+				] ),
+				'gravity_forms'         => new Fieldmanager_Select( 'Form', [
 					'options' => $gravity_forms,
-				) ),
-				'form_cta'              => new Fieldmanager_Textfield( 'Form Call To Action', array(
-					'attributes' => array( 'style' => 'width:100%' ),
-				) ),
-				'campaign_override'     => new Fieldmanager_Textfield( 'Campaign Activity field value', array(
+				] ),
+				'form_cta'              => new Fieldmanager_Textfield( 'Form Call To Action', [
+					'attributes' => [ 'style' => 'width:100%' ],
+				] ),
+				'campaign_override'     => new Fieldmanager_Textfield( 'Campaign Activity field value', [
 					'description' => 'Hidden input\'s value for tracking. Will default to form\'s value.',
-					'attributes'  => array( 'style' => 'width:100%' ),
-				) ),
-			),
-		) );
+					'attributes'  => [ 'style' => 'width:100%' ],
+				] ),
+			],
+		] );
 
 		// Add our meta box to the side rail.
-		$fm->add_meta_box( 'Form Setup', array( 'page', 'post', 'program', 'college', 'department', 'event', 'location' ), 'side' );
+		$fm->add_meta_box( 'Form Setup', [ 'page', 'post', 'program', 'college', 'department', 'event', 'location' ], 'side' );
 	}
 }

@@ -22,9 +22,9 @@ class Nu_Country_Field extends GF_Field_Select {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class Nu_Country_Field extends GF_Field_Select {
 				<?php
 				// Create our array of countries.
 				// Note: keys are currently not used.
-				$countries = array(
+				$countries = [
 					'AF' => 'Afghanistan',
 					'AL' => 'Albania',
 					'DZ' => 'Algeria',
@@ -257,7 +257,8 @@ class Nu_Country_Field extends GF_Field_Select {
 					'YE' => 'Yemen',
 					'ZM' => 'Zambia',
 					'ZW' => 'Zimbabwe',
-				);
+				];
+
 				foreach ( $countries as $country ) {
 					?>
 					new Choice("<?php echo esc_html( $country ); ?>"),

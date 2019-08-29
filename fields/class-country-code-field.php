@@ -28,9 +28,9 @@ class Country_Code_Field extends GF_Field_Select {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
 		add_action( 'gform_pre_submission', 'Country_Code_Field::add_country_to_webhooks', 10, 1 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
 	/**
@@ -48,10 +48,10 @@ class Country_Code_Field extends GF_Field_Select {
 	 * @return array
 	 */
 	public function get_form_editor_button() {
-		return array(
+		return [
 			'group' => 'standard_fields',
 			'text'  => $this->get_form_editor_field_title(),
-		);
+		];
 	}
 
 	/**
@@ -60,7 +60,7 @@ class Country_Code_Field extends GF_Field_Select {
 	 * @return array
 	 */
 	public function get_form_editor_field_settings() {
-		return array(
+		return [
 			'conditional_logic_field_setting',
 			'prepopulate_field_setting',
 			'error_message_setting',
@@ -77,7 +77,7 @@ class Country_Code_Field extends GF_Field_Select {
 			'duplicate_setting',
 			'description_setting',
 			'css_class_setting',
-		);
+		];
 	}
 
 	/**
@@ -136,7 +136,7 @@ class Country_Code_Field extends GF_Field_Select {
 	public function get_choices( $selected_country ) {
 		$choices          = '';
 		$selected_country = strtolower( $selected_country );
-		$countries        = array_merge( array( '' ), $this->get_country_codes() );
+		$countries        = array_merge( [ '' ], $this->get_country_codes() );
 		foreach ( $countries as $country_data ) {
 			$country_name  = ! empty( $country_data['country_name'] ) ? $country_data['country_name'] : '';
 			$dialing_code  = ! empty( $country_data['dialing_code'] ) ? $country_data['dialing_code'] : '';

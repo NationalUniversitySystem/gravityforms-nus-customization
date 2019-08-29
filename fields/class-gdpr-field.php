@@ -28,9 +28,9 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 * Register hooks.
 		 */
 		public function add_hooks() {
-			add_filter( 'gform_field_css_class', array( $this, 'custom_container_class' ), 10, 3 );
-			add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-			add_filter( 'gform_field_validation', array( $this, 'validate_field' ), 10, 4 );
+			add_filter( 'gform_field_css_class', [ $this, 'custom_container_class' ], 10, 3 );
+			add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+			add_filter( 'gform_field_validation', [ $this, 'validate_field' ], 10, 4 );
 		}
 
 		/**
@@ -48,10 +48,10 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 * @return array
 		 */
 		public function get_form_editor_button() {
-			return array(
+			return [
 				'group' => 'standard_fields',
 				'text'  => $this->get_form_editor_field_title(),
-			);
+			];
 		}
 
 		/**
@@ -65,7 +65,7 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 *
 		 * @return string
 		 */
-		public function get_field_input( $form, $value = array(), $entry = null ) {
+		public function get_field_input( $form, $value = [], $entry = null ) {
 			// Determine if this is an ancient incompatible entry/field.
 			$incompatible_field = false;
 			if ( empty( $this->inputs ) && ! empty( $this->choices[0] ) && ! empty( $this->choices[0]['text'] ) ) {

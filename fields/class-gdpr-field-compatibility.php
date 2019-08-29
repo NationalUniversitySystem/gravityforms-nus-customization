@@ -34,9 +34,9 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
 	/**
@@ -54,7 +54,7 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 	 * @return array
 	 */
 	public function get_form_editor_field_settings() {
-		return array(
+		return [
 			'conditional_logic_field_setting',
 			'error_message_setting',
 			'label_setting',
@@ -66,7 +66,7 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 			'placeholder_setting',
 			'description_setting',
 			'css_class_setting',
-		);
+		];
 	}
 
 	/**

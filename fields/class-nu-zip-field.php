@@ -22,11 +22,11 @@ class Nu_Zip_Field extends GF_Field_Text {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_action( 'gform_pre_submission', array( $this, 'add_state' ), 10, 1 );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
-		add_filter( 'gform_field_validation', array( $this, 'validate_field' ), 10, 4 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_action( 'gform_pre_submission', [ $this, 'add_state' ] );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_field_validation', [ $this, 'validate_field' ], 10, 4 );
 	}
 
 	/**

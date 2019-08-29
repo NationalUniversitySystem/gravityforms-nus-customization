@@ -23,8 +23,8 @@ class Military_Field extends GF_Field_Checkbox {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
 	/**

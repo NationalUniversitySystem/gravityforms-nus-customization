@@ -22,11 +22,11 @@ class Nu_Phone_Field extends GF_Field_Text {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_action( 'gform_addon_pre_process_feeds', array( $this, 'stop_spam' ), 10, 3 );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
-		add_filter( 'gform_field_validation', array( $this, 'validate_field' ), 10, 4 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_action( 'gform_addon_pre_process_feeds', [ $this, 'stop_spam' ], 10, 3 );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_field_validation', [ $this, 'validate_field' ], 10, 4 );
 	}
 
 	/**
@@ -69,9 +69,9 @@ class Nu_Phone_Field extends GF_Field_Text {
 			// Make sure this field type exists.
 			if ( false !== $nu_phone_field_id ) {
 				$nu_phone_value  = rgpost( 'input_' . $nu_phone_field_id );
-				$blocked_numbers = array(
+				$blocked_numbers = [
 					'5551212',
-				);
+				];
 
 				foreach ( $blocked_numbers as $blocked_number ) {
 					if ( false !== strpos( $nu_phone_value, $blocked_number ) ) {

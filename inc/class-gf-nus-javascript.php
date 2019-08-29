@@ -12,8 +12,8 @@ class Gf_Nus_Javascript {
 	 * Use class construct method to define all filters & actions
 	 */
 	public function __construct() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
-		add_action( 'script_loader_tag', array( $this, 'do_script_loader_tag' ), 10, 3 );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ], 99 );
+		add_action( 'script_loader_tag', [ $this, 'do_script_loader_tag' ], 10, 3 );
 	}
 
 	/**
@@ -36,10 +36,10 @@ class Gf_Nus_Javascript {
 	 */
 	public function enqueue_scripts() {
 		if ( ! wp_script_is( 'polyfill-service' ) ) {
-			wp_enqueue_script( 'polyfill-service', 'https://polyfill.io/v3/polyfill.min.js?flags=gated&features=Array.prototype.forEach%2CNodeList.prototype.forEach%2CElement.prototype.matches', array(), '3.0.0', true );
+			wp_enqueue_script( 'polyfill-service', 'https://polyfill.io/v3/polyfill.min.js?flags=gated&features=Array.prototype.forEach%2CNodeList.prototype.forEach%2CElement.prototype.matches', [], '3.0.0', true );
 		}
-		wp_enqueue_script( 'gravityforms-nus', GF_NUS_URL . '/js/nus-gravity-forms.js', array( 'jquery', 'polyfill-service' ), filemtime( GF_NUS_PATH . '/js/nus-gravity-forms.js' ), true );
-		wp_localize_script( 'gravityforms-nus', 'NuAjaxObject', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
+		wp_enqueue_script( 'gravityforms-nus', GF_NUS_URL . '/js/nus-gravity-forms.js', [ 'jquery', 'polyfill-service' ], filemtime( GF_NUS_PATH . '/js/nus-gravity-forms.js' ), true );
+		wp_localize_script( 'gravityforms-nus', 'NuAjaxObject', [ 'ajax_url' => admin_url( 'admin-ajax.php' ) ] );
 	}
 
 	/**
@@ -56,9 +56,10 @@ class Gf_Nus_Javascript {
 	 */
 	public function do_script_loader_tag( $tag, $handle, $src ) {
 		// The handles of the enqueued scripts we want to defer.
-		$defer_scripts = array(
+		$defer_scripts = [
 			'gravityforms-nus',
-		);
+		];
+
 		if ( in_array( $handle, $defer_scripts, true ) ) {
 			return str_replace( ' src', ' defer="defer" src', $tag );
 		}

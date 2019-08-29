@@ -13,18 +13,18 @@ class Gf_Nus_Markup {
 	 */
 	public function __construct() {
 		// Filters.
-		add_filter( 'gform_submit_button', array( $this, 'form_submit_button' ), 10, 2 );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 6 );
-		add_filter( 'gform_validation_message', array( $this, 'change_fail_message' ), 10, 2 );
-		add_filter( 'gform_form_tag', array( $this, 'form_tag' ), 10, 2 );
-		add_filter( 'gform_field_value_oh_location', array( $this, 'populate_location' ) );
-		add_filter( 'gform_field_value_oh_date', array( $this, 'populate_date' ) );
-		add_filter( 'gform_field_value_oh_track', array( $this, 'populate_track' ) );
-		add_filter( 'gform_field_value_formID', array( $this, 'populate_form_id' ) );
+		add_filter( 'gform_submit_button', [ $this, 'form_submit_button' ], 10, 2 );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
+		add_filter( 'gform_form_tag', [ $this, 'form_tag' ], 10, 2 );
+		add_filter( 'gform_field_value_oh_location', [ $this, 'populate_location' ] );
+		add_filter( 'gform_field_value_oh_date', [ $this, 'populate_date' ] );
+		add_filter( 'gform_field_value_oh_track', [ $this, 'populate_track' ] );
+		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
 
 		// Actions.
-		add_action( 'gform_enqueue_scripts', array( $this, 'dequeue_gf_scripts' ), 11 );
+		add_action( 'gform_enqueue_scripts', [ $this, 'dequeue_gf_scripts' ], 11 );
 	}
 
 	/**
@@ -72,13 +72,13 @@ class Gf_Nus_Markup {
 		}
 
 		// Setup our autocomplete values - label values on left, autocomplete values on right.
-		$auto_complete_values = array(
+		$auto_complete_values = [
 			'First Name'    => 'given-name',
 			'Last Name'     => 'family-name',
 			'Name'          => 'name',
 			'Email Address' => 'email',
 			'Email'         => 'email',
-		);
+		];
 
 		$name               = 'input_' . esc_attr( $field->id ); // Get our input ID to use throughout.
 		$content            = ''; // Create var to modify/use down the page.

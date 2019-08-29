@@ -12,8 +12,8 @@ class Custom_Validation {
 	 * Use class construct method to define all filters & actions
 	 */
 	public function __construct() {
-		add_filter( 'gform_field_validation', array( $this, 'validate_text_field' ), 10, 4 );
-		add_action( 'gform_addon_pre_process_feeds', array( $this, 'halt_fake_email' ), 10, 3 );
+		add_filter( 'gform_field_validation', [ $this, 'validate_text_field' ], 10, 4 );
+		add_action( 'gform_addon_pre_process_feeds', [ $this, 'halt_fake_email' ], 10, 3 );
 	}
 
 	/**
@@ -73,7 +73,7 @@ class Custom_Validation {
 			// If the value of the email field matches the value in our blocked domains array.
 			if ( strpos( $email, $blocked_domain ) !== false ) {
 				// Still submit to WordPress and show thank you page, but don't perform webhook (sneaky).
-				return array();
+				return [];
 			}
 		}
 		// Otherwise, run as normal.

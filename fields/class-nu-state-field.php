@@ -22,9 +22,9 @@ class Nu_State_Field extends GF_Field_Select {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
 	/**
@@ -51,7 +51,7 @@ class Nu_State_Field extends GF_Field_Select {
 				<?php
 				// Create our array of states.
 				// Note: keys are currently not used.
-				$states = array(
+				$states = [
 					'AL' => 'ALABAMA',
 					'AK' => 'ALASKA',
 					'AS' => 'AMERICAN SAMOA',
@@ -114,7 +114,8 @@ class Nu_State_Field extends GF_Field_Select {
 					'AE' => 'ARMED FORCES AFRICA \ CANADA \ EUROPE \ MIDDLE EAST',
 					'AA' => 'ARMED FORCES AMERICA (EXCEPT CANADA)',
 					'AP' => 'ARMED FORCES PACIFIC',
-				);
+				];
+
 				foreach ( $states as $state ) {
 					?>
 					new Choice("<?php echo esc_html( $state ); ?>"),
