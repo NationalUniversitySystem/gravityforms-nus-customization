@@ -33,7 +33,7 @@ class Nu_Country_Field extends GF_Field_Select {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Country', 'national-university' );
+		return esc_attr__( 'Country', 'national-university' );
 	}
 
 	/**

@@ -33,7 +33,7 @@ class Military_Field extends GF_Field_Checkbox {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Military', 'national-university' );
+		return esc_attr__( 'Military', 'national-university' );
 	}
 
 	/**

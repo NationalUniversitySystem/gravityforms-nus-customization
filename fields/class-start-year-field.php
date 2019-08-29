@@ -33,7 +33,7 @@ class Start_Year_Field extends GF_Field_Select {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Start Year', 'national-university' );
+		return esc_attr__( 'Start Year', 'national-university' );
 	}
 
 	/**

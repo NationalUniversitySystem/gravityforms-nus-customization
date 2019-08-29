@@ -39,7 +39,7 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 * @return string
 		 */
 		public function get_form_editor_field_title() {
-			return esc_attr__( 'NU GDPR', 'national-university' );
+			return esc_attr__( 'GDPR', 'national-university' );
 		}
 
 		/**

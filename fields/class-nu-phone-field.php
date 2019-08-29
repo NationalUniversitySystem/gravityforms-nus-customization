@@ -35,7 +35,7 @@ class Nu_Phone_Field extends GF_Field_Text {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Phone', 'national-university' );
+		return esc_attr__( 'Phone', 'national-university' );
 	}
 
 	/**

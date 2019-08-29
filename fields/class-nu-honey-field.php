@@ -34,7 +34,7 @@ class Nu_Honey_Field extends GF_Field_Text {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Honeypot', 'national-university' );
+		return esc_attr__( 'Honeypot', 'national-university' );
 	}
 
 	/**

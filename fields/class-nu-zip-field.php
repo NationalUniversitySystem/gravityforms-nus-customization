@@ -35,7 +35,7 @@ class Nu_Zip_Field extends GF_Field_Text {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Zip Code', 'national-university' );
+		return esc_attr__( 'Zip Code', 'national-university' );
 	}
 
 	/**
