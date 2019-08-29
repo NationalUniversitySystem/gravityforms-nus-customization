@@ -37,6 +37,18 @@ class Program_Field extends GF_Field_Select {
 	}
 
 	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
+	}
+
+	/**
 	 * Define the values/display field
 	 *
 	 * @return void

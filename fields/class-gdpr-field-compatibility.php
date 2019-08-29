@@ -49,6 +49,18 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 	}
 
 	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
+	}
+
+	/**
 	 * The settings which should be available on the field in the form editor.
 	 *
 	 * @return array

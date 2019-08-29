@@ -43,13 +43,13 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		}
 
 		/**
-		 * Assign the field button to the Advanced Fields group.
+		 * Assign the field button to the Custom Fields group.
 		 *
 		 * @return array
 		 */
 		public function get_form_editor_button() {
 			return [
-				'group' => 'standard_fields',
+				'group' => 'nu_fields',
 				'text'  => $this->get_form_editor_field_title(),
 			];
 		}

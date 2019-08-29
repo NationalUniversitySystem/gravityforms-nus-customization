@@ -41,13 +41,13 @@ class Programs_By_College_Field extends GF_Field_Select {
 	}
 
 	/**
-	 * Assign the field button to a fields group.
+	 * Assign the field button to the Custom Fields group.
 	 *
 	 * @return array
 	 */
 	public function get_form_editor_button() {
 		return [
-			'group' => 'standard_fields',
+			'group' => 'nu_fields',
 			'text'  => $this->get_form_editor_field_title(),
 		];
 	}
