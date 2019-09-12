@@ -72,11 +72,10 @@ class National_University_Gravityforms {
 			'serialize_data' => false,
 			'add_to_prefix'  => false,
 			'children'       => [
-				'gravity_forms_display' => new Fieldmanager_Select( 'Display Form?', [
-					'options' => [
-						'yes' => 'Yes',
-						'no'  => 'No',
-					],
+				'gravity_forms_display' => new Fieldmanager_Checkbox( 'Display Form?', [
+					'default_value'   => 'yes',
+					'checked_value'   => 'yes',
+					'unchecked_value' => 'no',
 				] ),
 				'gravity_forms'         => new Fieldmanager_Select( 'Form', [
 					'options' => $gravity_forms,
