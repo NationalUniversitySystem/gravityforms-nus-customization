@@ -252,19 +252,6 @@ class Gf_Nus_Markup {
 	}
 
 	/**
-	 * Remove Gravity Forms stylesheets and unnecessary scripts
-	 *
-	 * Gets rid of the nasty default css by removing the stylesheet and the datalist chosen JS.
-	 */
-	public function dequeue_gf_scripts() {
-		if ( ! is_admin() ) {
-			wp_dequeue_style( 'gforms_formsmain_css' );
-			wp_dequeue_style( 'gforms_browsers_css' );
-			wp_dequeue_script( 'gform_chosen' );
-		}
-	}
-
-	/**
 	 * Update failed form submission message
 	 *
 	 * Adds aria-alert so screen readers will know something bad happened on failed submit
@@ -289,5 +276,18 @@ class Gf_Nus_Markup {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Remove Gravity Forms stylesheets and unnecessary scripts
+	 *
+	 * Gets rid of the nasty default css by removing the stylesheet and the datalist chosen JS.
+	 */
+	public function dequeue_gf_scripts() {
+		if ( ! is_admin() ) {
+			wp_dequeue_style( 'gforms_formsmain_css' );
+			wp_dequeue_style( 'gforms_browsers_css' );
+			wp_dequeue_script( 'gform_chosen' );
+		}
 	}
 }
