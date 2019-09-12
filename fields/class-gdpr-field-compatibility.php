@@ -174,6 +174,6 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
 
 		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="' . $custom_classes . ' ' . $css_class . '">{FIELD_CONTENT}</li>';
+		return '<li id="' . $field_id . '" class="' . $css_class . ' ' . $custom_classes . '">{FIELD_CONTENT}</li>';
 	}
 }
