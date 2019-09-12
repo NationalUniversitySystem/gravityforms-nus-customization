@@ -22,7 +22,6 @@ class Gf_Nus_Markup {
 		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
 		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
-		add_filter( 'gform_form_tag', [ $this, 'form_tag' ], 10, 2 );
 		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
 
 		// Actions.
@@ -271,15 +270,7 @@ class Gf_Nus_Markup {
 	 * Adds aria-alert so screen readers will know something bad happened on failed submit
 	 */
 	public function change_fail_message( $message, $form ) {
-		$new_message = '';
-
-		return $new_message;
-	}
-
-	public function form_tag( $form_tag, $form ) {
-		$form_tag .= '<div role="alert" aria-atomic="true" class="validation_error"></div>';
-
-		return $form_tag;
+		return str_replace( ' class', '  role="alert" aria-atomic="true" class', $message );
 	}
 
 	/**

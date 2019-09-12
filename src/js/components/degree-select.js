@@ -126,11 +126,6 @@
 			degreeSelect( degree, 'repeat', modifyPrograms );
 
 			$( '.gfield_error input, .gfield_error select' ).attr( 'aria-invalid', 'true' );
-
-			if ( $( '#gform_wrapper_' + formId ).hasClass( 'gform_validation_error' ) ) {
-				$( '#gform_' + formId + ' .validation_error' ).html( 'There was a problem with your submission. Errors have been highlighted below.' );
-			}
-
 		} );
 
 	} );
