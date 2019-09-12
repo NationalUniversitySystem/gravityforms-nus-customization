@@ -67,17 +67,17 @@ class Custom_Validation {
 		$add_on   = Gf_Nus_Addon::get_instance();
 		$settings = $add_on->get_plugin_settings();
 		// Make an array from our csv values via admin settings.
-		$blocked_domains = explode( ',', $settings['blocked_domains'] );
+		$blocked_domains = array_filter( explode( ',', $settings['blocked_domains'] ) );
 
 		if ( ! empty( $blocked_domains ) ) {
-		// Run through each value in the array.
-		foreach ( $blocked_domains as $blocked_domain ) {
-			// If the value of the email field matches the value in our blocked domains array.
+			// Run through each value in the array.
+			foreach ( $blocked_domains as $blocked_domain ) {
+				// If the value of the email field matches the value in our blocked domains array.
 				if ( false !== strpos( $email, $blocked_domain ) ) {
-				// Still submit to WordPress and show thank you page, but don't perform webhook (sneaky).
-				return [];
+					// Still submit to WordPress and show thank you page, but don't perform webhook (sneaky).
+					return [];
+				}
 			}
-		}
 		}
 
 		// Otherwise, run as normal.
