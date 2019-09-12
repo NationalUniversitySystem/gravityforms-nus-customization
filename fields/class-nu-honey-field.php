@@ -163,7 +163,7 @@ class Nu_Honey_Field extends GF_Field_Text {
 		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
 
 		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="form__group ' . $custom_classes . ' ' . $css_class . '">{FIELD_CONTENT}</li>';
+		return '<li id="' . $field_id . '" class="' . $custom_classes . ' ' . $css_class . '">{FIELD_CONTENT}</li>';
 	}
 
 	/**

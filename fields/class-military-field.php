@@ -105,7 +105,7 @@ class Military_Field extends GF_Field_Checkbox {
 		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
 
 		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="form__group ' . $custom_classes . ' ' . $css_class . '">{FIELD_CONTENT}' . $tooltip . '</li>';
+		return '<li id="' . $field_id . '" class="' . $custom_classes . ' ' . $css_class . '">{FIELD_CONTENT}' . $tooltip . '</li>';
 	}
 
 	/**

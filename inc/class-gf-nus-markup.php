@@ -20,7 +20,7 @@ class Gf_Nus_Markup {
 	public function __construct() {
 		// Filters.
 		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
-		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
 		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
 
@@ -207,48 +207,44 @@ class Gf_Nus_Markup {
 	}
 
 	/**
-	 * Add default classes to input containers
+	 * Modify the string holding the classes for the container/wrapper of the field
+	 * - Natively the container/wrapper is an li
 	 *
-	 * Setup some default styling so manual entry isn't necessary
+	 * @param string $css_classes Class list for the field container.
+	 * @param object $field       The GF field object with info.
+	 * @param array  $form        The current GF form data.
 	 *
-	 * @param string $field_container The field container's markup.
-	 * @param object $field           The GF field object with info.
-	 * @param array  $form            The current GF form data.
-	 * @param string $css_class       Class list for the field container.
-	 * @param string $style           Style attribute text.
-	 * @param string $field_content   Full field content, including the label.
+	 * @return string
 	 */
-	public function custom_field_container( $field_container, $field, $form, $css_class, $style, $field_content ) {
-		// Get the ID of our field.
-		$id = $field->id;
+	public function modify_field_container_classes( $css_classes, $field, $form ) {
+		// We don't need to modify the admin classes.
+		if ( is_admin() ) {
+			return $css_classes;
+		}
 
 		// Default class for container.
-		$custom_classes = $css_class . ' form__group';
+		$css_classes .= ' form__group';
 
 		// If we have a description, add class to state it.
 		if ( $field->description ) {
-			$custom_classes .= ' has-desc';
+			$css_classes .= ' has-desc';
 		}
 
 		switch ( $field->type ) {
 			case 'select':
-				$custom_classes .= ' form__group--select';
+				$css_classes .= ' form__group--select';
 				break;
 			case 'radio':
-				$custom_classes .= ' form__group--radios';
+				$css_classes .= ' form__group--radios';
 				break;
 			case 'checkbox':
-				$custom_classes .= ' form__group--checkbox';
+				$css_classes .= ' form__group--checkbox';
 				break;
 			default:
-				$custom_classes .= ' ' . str_replace( ' ', '_', strtolower( $field->label ) );
+				$css_classes .= ' ' . str_replace( ' ', '_', strtolower( $field->label ) );
 		}
 
-		// Setup how our field_id is displayed.
-		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
-
-		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="' . $custom_classes . '">{FIELD_CONTENT}</li>';
+		return $css_classes;
 	}
 
 	/**
