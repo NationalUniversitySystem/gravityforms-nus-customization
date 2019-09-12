@@ -23,9 +23,6 @@ class Gf_Nus_Markup {
 		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
 		add_filter( 'gform_form_tag', [ $this, 'form_tag' ], 10, 2 );
-		add_filter( 'gform_field_value_oh_location', [ $this, 'populate_location' ] );
-		add_filter( 'gform_field_value_oh_date', [ $this, 'populate_date' ] );
-		add_filter( 'gform_field_value_oh_track', [ $this, 'populate_track' ] );
 		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
 
 		// Actions.
@@ -283,44 +280,6 @@ class Gf_Nus_Markup {
 		$form_tag .= '<div role="alert" aria-atomic="true" class="validation_error"></div>';
 
 		return $form_tag;
-	}
-
-	/**
-	 * Populate oh_date hidden field
-	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_location( $value ) {
-		$location      = get_post_meta( get_the_ID(), 'location_select', true );
-		$location_city = get_post_meta( $location, 'city', true );
-
-		return $location_city;
-	}
-
-	/**
-	 * Populate oh_date hidden field
-	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_date( $value ) {
-		$meta = get_post_meta( get_the_ID() );
-		if ( ! empty( $meta['event_details_start_time'][0] ) ) {
-			$start = DateTime::createFromFormat( 'U', $meta['event_details_start_time'][0] );
-			$start->setTimezone( new DateTimeZone( 'America/Los_Angeles' ) );
-			$event_date = $start->format( 'm/d/Y' );
-		}
-		return $event_date;
-	}
-
-	/**
-	 * Populate oh_track hidden field
-	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_track( $value ) {
-		$location      = get_post_meta( get_the_ID(), 'location_select', true );
-		$location_city = get_post_meta( $location, 'city', true );
-		return 'eo-openhouse-' . str_replace( ' ', '-', strtolower( $location_city ) );
 	}
 
 	/**
