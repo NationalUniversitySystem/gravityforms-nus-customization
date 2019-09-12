@@ -13,7 +13,6 @@ class Gf_Nus_Markup {
 	 */
 	public function __construct() {
 		// Filters.
-		add_filter( 'gform_submit_button', [ $this, 'form_submit_button' ], 10, 2 );
 		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
 		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
@@ -38,20 +37,6 @@ class Gf_Nus_Markup {
 		}
 
 		return self::$instance;
-	}
-
-	/**
-	 * Modify Gravity Forms submit button html
-	 *
-	 * Make it pretty
-	 *
-	 * @param string $button_input GF generated button markup.
-	 * @param array  $form   array The GForm field information.
-	 */
-	public function form_submit_button( $button_input, $form ) {
-		$button_text = ! empty( $form['button']['text'] ) ? $form['button']['text'] : 'Request Info';
-
-		return "<button class='btn btn--bg-gold btn--navy icon icon--arrow-right icon--margin-left' id='gform_submit_button_{$form['id']}'><span>{$button_text}</span></button>";
 	}
 
 	/**
