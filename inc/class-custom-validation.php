@@ -1,5 +1,11 @@
 <?php
+/**
+ * Manage custom Gravityforms validation for our forms
+ */
 
+/**
+ * Custom_Validation class
+ */
 class Custom_Validation {
 	/**
 	 * Instance of this class
@@ -61,20 +67,20 @@ class Custom_Validation {
 	public function halt_fake_email( $feeds, $entry, $form ) {
 		// Get the value of our email field.
 		$email = $this->get_value_by_label( $form, $entry, 'Email Address' );
-		// Remove any whitespace.
 		$email = trim( $email );
-		// Get our settings from the GF admin page.
+
 		$add_on   = Gf_Nus_Addon::get_instance();
 		$settings = $add_on->get_plugin_settings();
+
 		// Make an array from our csv values via admin settings.
 		$blocked_domains = array_filter( explode( ',', $settings['blocked_domains'] ) );
 
 		if ( ! empty( $blocked_domains ) ) {
-			// Run through each value in the array.
+			// Run through each value in the blocked domains to see if
+			// the submission's email field matches any of our values in the settings.
 			foreach ( $blocked_domains as $blocked_domain ) {
-				// If the value of the email field matches the value in our blocked domains array.
 				if ( false !== strpos( $email, $blocked_domain ) ) {
-					// Still submit to WordPress and show thank you page, but don't perform webhook (sneaky).
+					// Continue the Gravityforms flow but kill the webhook feeds.
 					return [];
 				}
 			}
