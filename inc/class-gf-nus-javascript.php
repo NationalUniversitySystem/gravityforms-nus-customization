@@ -1,5 +1,11 @@
 <?php
+/**
+ * Handle the plugin's JS related functionality
+ */
 
+/**
+ * Gf_Nus_Javascript class
+ */
 class Gf_Nus_Javascript {
 	/**
 	 * Instance of this class

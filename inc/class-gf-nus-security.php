@@ -1,5 +1,11 @@
 <?php
+/**
+ * Handle form security functionality
+ */
 
+/**
+ * Gf_Nus_Security class
+ */
 class Gf_Nus_Security {
 	/**
 	 * Instance of this class

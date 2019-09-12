@@ -1,5 +1,11 @@
 <?php
+/**
+ * Handle markup modifications
+ */
 
+/**
+ * Gf_Nus_Markup class
+ */
 class Gf_Nus_Markup {
 	/**
 	 * Instance of this class
