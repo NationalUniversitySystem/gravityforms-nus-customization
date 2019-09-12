@@ -44,16 +44,11 @@ class National_University_Gravityforms {
 	 * - An input for displaying the Call to Action heading
 	 */
 	public function gravity_forms_meta() {
-		// If Gravity Forms plugin is not installed/active, bail.
-		if ( ! class_exists( 'GFAPI' ) ) {
-			return;
-		}
-
 		// Get all of our info on Gravity Forms in an array.
 		$forms = GFAPI::get_forms();
 
 		// Create an array to use as options for forms selection dropdown,
-		// with a default null value in case no form is needed
+		// with a default null value in case no form is needed.
 		$gravity_forms = [ '' => '-- Select A Form --' ];
 
 		// Loop through all the Gravity Forms and add them to the array that will be used for options.
