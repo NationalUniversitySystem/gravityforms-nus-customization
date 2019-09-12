@@ -24,6 +24,7 @@ class Military_Field extends GF_Field_Checkbox {
 	 */
 	public function add_hooks() {
 		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
 		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
@@ -69,6 +70,24 @@ class Military_Field extends GF_Field_Checkbox {
 	}
 
 	/**
+	 * Add custom class(es) to field
+	 *
+	 * @param string $css_classes Class list for the field container.
+	 * @param object $field       The GF field object with info.
+	 * @param array  $form        The current GF form data.
+	 *
+	 * @return string
+	 */
+	public function modify_field_container_classes( $css_classes, $field, $form ) {
+		// If is in the admin or not this field type, leave it be.
+		if ( is_admin() || $this->type !== $field->type ) {
+			return $css_classes;
+		}
+
+		return $css_classes .= ' form__group--military form__group--tooltip';
+	}
+
+	/**
 	 * Add default classes to input containers
 	 *
 	 * Setup some default styling so manual entry isn't necessary
@@ -88,16 +107,6 @@ class Military_Field extends GF_Field_Checkbox {
 		// Get the ID of our field.
 		$id = $field->id;
 
-		// Empty content variable.
-		$custom_classes = '';
-
-		// If we have a description, set our class as such.
-		if ( ! empty( $field->description ) ) {
-			$custom_classes .= 'has-desc ';
-		}
-
-		$custom_classes .= 'form__group--military form__group--tooltip';
-
 		$tooltip  = '<span data-tool="#military-tooltip" class="icon icon--question-circle"></span>';
 		$tooltip .= '<div class="tooltip" id="military-tooltip">Check this box if you are active duty, veteran, guard, reserve, or a spouse/dependent</div>';
 
@@ -105,7 +114,7 @@ class Military_Field extends GF_Field_Checkbox {
 		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
 
 		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="' . $css_class . ' ' . $custom_classes . '">{FIELD_CONTENT}' . $tooltip . '</li>';
+		return '<li id="' . $field_id . '" class="' . $css_class . '">{FIELD_CONTENT}' . $tooltip . '</li>';
 	}
 
 	/**

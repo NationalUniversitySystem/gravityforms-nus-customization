@@ -250,7 +250,8 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 * @return string
 		 */
 		public function custom_container_class( $css_class, $field, $form ) {
-			if ( 'gdpr' !== $field->type ) {
+			// If is in the admin or not this field type, leave it be.
+			if ( is_admin() || $this->type !== $field->type ) {
 				return $css_class;
 			}
 
