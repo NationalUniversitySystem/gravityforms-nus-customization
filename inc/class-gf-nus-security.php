@@ -39,14 +39,18 @@ class Gf_Nus_Security {
 	 * Encrypt Gravity Forms Data
 	 *
 	 * Make it unreadable and safe
+	 *
+	 * @param string|array $value The fields input value.
+	 * @param array        $lead  The current entry object.
+	 * @param GF_Field     $field The current field object.
+	 * @param array        $form  The current form object.
 	 */
 	public function gf_custom_save_field_value( $value, $lead, $field, $form ) {
-		$key = $field->formId;
+		$key = $field->formId; // phpcs:disable WordPress.NamingConventions
 
 		// If the value is blank (no value set, e.g. no utm params).
 		if ( '' === $value ) {
-
-			// Then set the value as an empty (space) string, so it returns as a string and not false (0 in eloqua).
+			// Set the value as an empty (space) string, so it returns as a string and not false (0 in eloqua).
 			$value = ' ';
 		}
 		return GFCommon::openssl_encrypt( $value, $key );
@@ -56,9 +60,14 @@ class Gf_Nus_Security {
 	 * Decrypt Gravity Forms Data
 	 *
 	 * Make it readable
+	 *
+	 * @param string|array $value The fields input value.
+	 * @param array        $entry  The current entry object.
+	 * @param GF_Field     $field The current field object.
+	 * @param string       $input_id The ID of the input being saved or the field ID for single input field types.
 	 */
 	public function gf_custom_decode_field( $value, $entry, $field, $input_id ) {
-		$key = $field->formId;
+		$key = $field->formId; // phpcs:disable WordPress.NamingConventions
 
 		return GFCommon::openssl_decrypt( $value, $key );
 	}
