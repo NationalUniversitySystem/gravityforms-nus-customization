@@ -38,11 +38,12 @@ class National_University_Gravityforms {
 	/**
 	 * Gravity Forms Meta Fields
 	 *
-	 * Creates a dropdown list of all gravity forms for use on pages
-	 * and an input for displaying the Call to Action title
+	 * Creates the following fields:
+	 * - Option to display the form or not
+	 * - A dropdown list of all gravity forms for use on pages
+	 * - An input for displaying the Call to Action heading
 	 */
 	public function gravity_forms_meta() {
-
 		// If Gravity Forms plugin is not installed/active, bail.
 		if ( ! class_exists( 'GFAPI' ) ) {
 			return;
@@ -51,16 +52,12 @@ class National_University_Gravityforms {
 		// Get all of our info on Gravity Forms in an array.
 		$forms = GFAPI::get_forms();
 
-		// Create an array with a default null value
-		// (so if no form is needed, one is not saved by default)
-		// to add our form data into as <option>.
+		// Create an array to use as options for forms selection dropdown,
+		// with a default null value in case no form is needed
 		$gravity_forms = [ '' => '-- Select A Form --' ];
 
-		// Loop through all the Gravity Forms data.
+		// Loop through all the Gravity Forms and add them to the array that will be used for options.
 		foreach ( $forms as $form ) {
-
-			// Add our Gravity Forms as <options> into the select,
-			// with the form ID as the value, and the form name as the option label.
 			$gravity_forms[ $form['id'] ] = $form['title'];
 		}
 
