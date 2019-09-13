@@ -225,6 +225,9 @@ class Gf_Nus_Markup {
 		// Default class for container.
 		$css_classes .= ' form__group';
 
+		// Always add the label as a class.
+		$css_classes .= ' ' . str_replace( ' ', '_', strtolower( $field->label ) );
+
 		// If we have a description, add class to state it.
 		if ( $field->description ) {
 			$css_classes .= ' has-desc';
@@ -240,8 +243,6 @@ class Gf_Nus_Markup {
 			case 'checkbox':
 				$css_classes .= ' form__group--checkbox';
 				break;
-			default:
-				$css_classes .= ' ' . str_replace( ' ', '_', strtolower( $field->label ) );
 		}
 
 		return $css_classes;
