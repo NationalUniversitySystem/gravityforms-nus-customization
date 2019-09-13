@@ -98,6 +98,7 @@ class Gf_Nus_Addon extends GFAddOn {
 		'fields/class-nu-zip-field.php',
 		'fields/class-country-code-field.php',
 		'fields/class-programs-by-college-field.php',
+		'deprecated/fields/class-gdpr-field-compatibility.php',
 	];
 
 	/**
@@ -129,7 +130,11 @@ class Gf_Nus_Addon extends GFAddOn {
 					$class_name = implode( '_', array_map( 'ucfirst', explode( '-', $class_name ) ) );
 
 					if ( class_exists( $class_name ) ) {
-						$this->class_names[] = $class_name;
+						${ $class_name } = new $class_name();
+
+						if ( ! in_array( ${ $class_name }->type, array_keys( $this->class_names ), true ) ) {
+							$this->class_names[ ${ $class_name }->type ] = $class_name;
+						}
 					}
 				}
 			}

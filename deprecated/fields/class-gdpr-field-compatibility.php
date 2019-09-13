@@ -45,7 +45,7 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'GDPR', 'national-university' );
+		return esc_attr__( 'GDPR (deprecated)', 'national-university' );
 	}
 
 	/**
