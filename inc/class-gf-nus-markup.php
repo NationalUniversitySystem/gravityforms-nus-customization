@@ -20,6 +20,7 @@ class Gf_Nus_Markup {
 	public function __construct() {
 		// Filters.
 		// add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_content', [ $this, 'modify_field_content' ], 10, 5 );
 		add_filter( 'gform_pre_render', [ $this, 'modify_input_classes' ] );
 		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
@@ -40,6 +41,31 @@ class Gf_Nus_Markup {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Create custom HTML form gravity forms
+	 *
+	 * Make the form output fit to our layout/standards
+	 *
+	 * TODO Check radio buttons
+	 * TODO Check datalist functionality
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+	 * @param string $value         Value of the input.
+	 * @param int    $random        Unused parameter? Actual plugin has no documentation on this parameter.
+	 * @param int    $form_id       Field's parent form ID.
+	 */
+	public function modify_field_content( $field_content, $field, $value, $random = 0, $form_id ) {
+		// If is in the admin, leave it be.
+		if ( is_admin() ) {
+			return $field_content;
+		}
+
+		$field_content = $this->replace_front_end_classes( $field_content, $field );
+
+		return $field_content;
 	}
 
 	/**
@@ -318,4 +344,22 @@ class Gf_Nus_Markup {
 			wp_dequeue_script( 'gform_chosen' );
 		}
 	}
+	/**
+	 * Replace default Gravity forms classes for our custom classes
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+
+	 * @return string
+	 */
+	private function replace_front_end_classes( $field_content, $field ) {
+		$label_class   = 'form__label' . ( 'hidden_label' === $field->labelPlacement ? ' sr-only' : '' ); // phpcs:ignore WordPress.NamingConventions
+		$field_content = str_replace( 'gfield_label', $label_class, $field_content );
+
+		$field_content = str_replace( 'gfield_required', 'required-label', $field_content );
+		$field_content = str_replace( 'gfield_description', 'form__description', $field_content );
+
+		return $field_content;
+	}
+
 }
