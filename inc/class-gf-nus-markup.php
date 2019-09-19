@@ -19,7 +19,7 @@ class Gf_Nus_Markup {
 	 */
 	public function __construct() {
 		// Filters.
-		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		// add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
 		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
 		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
