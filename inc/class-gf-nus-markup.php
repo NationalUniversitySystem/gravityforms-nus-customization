@@ -20,6 +20,7 @@ class Gf_Nus_Markup {
 	public function __construct() {
 		// Filters.
 		// add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_pre_render', [ $this, 'modify_input_classes' ] );
 		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
 		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
@@ -39,6 +40,36 @@ class Gf_Nus_Markup {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Modify the inputs' classes by being sneaky and piggy backing on the "size" option
+	 *
+	 * TODO Simplify the adding of classes to the input on a per field file.
+	 *
+	 * @param array $form The current GF form data.
+	 *
+	 * @return array
+	 */
+	public function modify_input_classes( $form ) {
+		foreach ( $form['fields'] as $key => $field ) {
+			$additional_classes = ' input input--styled';
+
+			switch ( $field->type ) {
+				case 'email':
+				case 'text':
+				case 'textarea':
+					$additional_classes .= ' input--text';
+					break;
+				case 'select':
+					$additional_classes .= ' input--select';
+					break;
+			}
+
+			$form['fields'][ $key ]['size'] .= $additional_classes;
+		}
+
+		return $form;
 	}
 
 	/**
