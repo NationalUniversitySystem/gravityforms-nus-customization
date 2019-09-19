@@ -48,11 +48,11 @@ class Default_Fields_Mods {
 		if ( 100 === $position ) {
 			?>
 			<li class="radio_choices_label_setting field_setting">
-				<label for="radio_choices_label_placement" class="section_label">
+				<label for="radio_choices_label_behavior" class="section_label">
 					<?php esc_html_e( 'Label Position/Behavior', 'national-university' ); ?>
 					<?php gform_tooltip( 'radio_choices_label_tip_value' ); ?>
 				</label>
-				<select id="radio_choices_label_placement" onchange="SetFieldProperty( 'radiosLabel', this.value );">
+				<select id="radio_choices_label_behavior" onchange="SetFieldProperty( 'labelBehavior', this.value );">
 					<option value=""><?php esc_html_e( 'Below Option', 'national-university' ); ?></option>
 					<option value="wrapped"><?php esc_html_e( 'Wrapped Around Option', 'national-university' ); ?></option>
 				</select>
@@ -74,7 +74,7 @@ class Default_Fields_Mods {
 
 			// Binding to the load field settings event to initialize the checkbox
 			jQuery( document ).bind( 'gform_load_field_settings', function( event, field, form ) {
-				jQuery( '#radio_choices_label_placement' ).val( field['radiosLabel'] );
+				jQuery( '#radio_choices_label_behavior' ).val( field['labelBehavior'] );
 			} );
 		</script>
 		<?php
