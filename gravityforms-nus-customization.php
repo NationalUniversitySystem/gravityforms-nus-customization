@@ -35,6 +35,7 @@ function gf_nus_load() {
 
 	$files_list = [
 		'tracking/class-gf-nus-fb-tracking.php',
+		'inc/class-default-fields-mods.php',
 		'inc/class-custom-validation.php',
 		'inc/class-gf-nus-javascript.php',
 		'inc/class-gf-nus-markup.php',
