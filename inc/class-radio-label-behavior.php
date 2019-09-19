@@ -22,7 +22,7 @@ class Radio_Label_Behavior {
 	public function __construct() {
 		add_action( 'gform_field_appearance_settings', [ $this, 'radio_choices_label_setting' ], 10, 2 );
 		add_action( 'gform_editor_js', [ $this, 'editor_script' ] );
-		add_filter( 'gform_tooltips', [ $this, 'add_encryption_tooltips' ] );
+		add_filter( 'gform_tooltips', [ $this, 'add_tooltip' ] );
 		add_filter( 'gform_field_choice_markup_pre_render', [ $this, 'set_up_radio_label' ], 10, 4 );
 	}
 
@@ -90,13 +90,13 @@ class Radio_Label_Behavior {
 	 *
 	 * @return array
 	 */
-	public function add_encryption_tooltips( $tooltips ) {
+	public function add_tooltip( $tooltips ) {
 		$tooltips['radio_choices_label_tip_value'] = '<h6>Label Position/Behavior</h6>Select if the label should be echoed out below the actual radio option markup or it should be wrapped around the option.';
 		return $tooltips;
 	}
 
 	/**
-	 * Undocumented function
+	 * Do the markup changes, if necessary, for the label to be either wrapped or below the radio option
 	 *
 	 * @param string $choice_markup The markup for the field including the wrapping <li>, label, and input (if it has not been altered from the native markup).
 	 * @param array  $choice        Array of options pertaining to the specific choice, including text, value, and isSelected.
