@@ -1,12 +1,14 @@
 <?php
 /**
- * Modifications done to the default Gravity Form fields
+ * Adds an option to control how the label for the native radio options behave
+ * - Displayed below the option (default way)
+ * - Wrapped around the option itself
  */
 
 /**
- * Default_Fields_mods class
+ * Radio_Label_Behavior class
  */
-class Default_Fields_Mods {
+class Radio_Label_Behavior {
 	/**
 	 * Instance of this class
 	 *
