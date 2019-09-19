@@ -294,6 +294,14 @@ class Gf_Nus_Markup {
 		switch ( $field->type ) {
 			case 'select':
 				$css_classes .= ' form__group--select';
+
+				// If any of the choices is selected, add the active class for label display.
+				$choices_is_selected = array_filter( array_column( $field->choices, 'isSelected' ) );
+
+				if ( ! empty( $choices_is_selected ) ) {
+					$css_classes .= ' form__group--active';
+				}
+
 				break;
 			case 'radio':
 				$css_classes .= ' form__group--radios';
