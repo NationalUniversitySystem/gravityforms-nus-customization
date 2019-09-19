@@ -64,6 +64,7 @@ class Gf_Nus_Markup {
 		}
 
 		$field_content = $this->replace_front_end_classes( $field_content, $field );
+		$field_content = $this->add_input_attributes( $field_content, $field );
 
 		return $field_content;
 	}
@@ -344,6 +345,7 @@ class Gf_Nus_Markup {
 			wp_dequeue_script( 'gform_chosen' );
 		}
 	}
+
 	/**
 	 * Replace default Gravity forms classes for our custom classes
 	 *
@@ -362,4 +364,43 @@ class Gf_Nus_Markup {
 		return $field_content;
 	}
 
+	/**
+	 * Add additional attributes to fields by string replacement if applicable
+	 * - autocomplete
+	 * - aria-hidden
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+	 *
+	 * @return string
+	 */
+	private function add_input_attributes( $field_content, $field ) {
+		// Setup our autocomplete values - label values on left, autocomplete values on right.
+		$auto_complete_values = [
+			'by_label' => [
+				'first name'    => 'given-name',
+				'last name'     => 'family-name',
+				'name'          => 'name',
+				'email address' => 'email',
+				'email'         => 'email',
+			],
+			'by_type'  => [
+				'email' => 'email',
+			],
+		];
+
+		if ( in_array( strtolower( $field->label ), array_keys( $auto_complete_values['by_label'] ), true ) ) {
+			$autocomplete_value = $auto_complete_values['by_label'][ strtolower( $field->label ) ];
+			$field_content      = str_replace( 'type', ' autocomplete="' . $autocomplete_value . '" type', $field_content );
+		} elseif ( in_array( $field->type, array_keys( $auto_complete_values['by_type'] ), true ) ) {
+			$autocomplete_value = $auto_complete_values['by_type'][ $field->type ];
+			$field_content      = str_replace( 'type', ' autocomplete="' . $autocomplete_value . '" type', $field_content );
+		}
+
+		if ( ! empty( $field->visibility ) && 'hidden' === $field->visibility ) {
+			$field_content = str_replace( 'type', ' aria-hidden="true" type', $field_content );
+		}
+
+		return $field_content;
+	}
 }
