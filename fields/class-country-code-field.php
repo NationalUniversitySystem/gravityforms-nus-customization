@@ -1596,7 +1596,16 @@ class Country_Code_Field extends GF_Field_Select {
 			return $css_classes;
 		}
 
-		return $css_classes .= ' country-code--select';
+		$css_classes .= ' country-code--select';
+
+		// If any of the choices is selected, add the active class for label display.
+		$choices_is_selected = array_filter( array_column( $field->choices, 'isSelected' ) );
+
+		if ( ! empty( $choices_is_selected ) ) {
+			$css_classes .= ' form__group--active';
+		}
+
+		return $css_classes;
 	}
 
 	/**
