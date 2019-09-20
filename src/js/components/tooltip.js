@@ -1,14 +1,31 @@
-( function( $ ) {
-	$( document ).ready( function( $ ) {
-		$( 'body' ).on( 'mouseenter', '.gfield__tooltip', function() {
-			var tooltip = $( this ).data( 'tooltip-content' );
+( ( d ) => {
+	d.addEventListener( 'DOMContentLoaded', () => {
+		d.addEventListener( 'mouseenter', function( event ) {
+			if ( event.target.closest( 'span[data-tooltip-content]' ) && event.target.dataset.tooltipContent ) {
+				const tooltip = d.querySelector( event.target.dataset.tooltipContent );
+				tooltip.style.display = 'block';
+			}
+		}, true );
 
-			$( tooltip ).fadeIn( 200 );
-		} ).on( 'mouseleave', '.gfield__tooltip', function() {
-			var tooltip = $( this ).data( 'tooltip-content' );
+		d.querySelector( 'body' ).addEventListener( 'touchstart', function( event ) {
+			if ( event.target.closest( 'span[data-tooltip-content]' ) && event.target.dataset.tooltipContent ) {
+				const tooltip = d.querySelector( event.target.dataset.tooltipContent );
+				tooltip.style.display = 'block';
+			}
+		}, true );
 
-			$( tooltip ).fadeOut( 200 );
-		} );
+		d.querySelector( 'body' ).addEventListener( 'mouseleave', function( event ) {
+			if ( event.target.closest( 'span[data-tooltip-content]' ) && event.target.dataset.tooltipContent ) {
+				const tooltip = d.querySelector( event.target.dataset.tooltipContent );
+				tooltip.style.display = 'none';
+			}
+		}, true );
+
+		d.querySelector( 'body' ).addEventListener( 'touchstart', function( event ) {
+			if ( ! event.target.closest( 'span[data-tooltip-content]' ) && event.target.dataset.tooltipContent ) {
+				const tooltip = d.querySelector( event.target.dataset.tooltipContent );
+				tooltip.style.display = 'none';
+			}
+		}, true );
 	} );
-} )( jQuery );
-
+} )( document );
