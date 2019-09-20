@@ -18,7 +18,7 @@ class Checkbox_Tooltip {
 	 * Use class construct method to define all filters & actions
 	 */
 	public function __construct() {
-		add_action( 'gform_field_standard_settings', [ $this, 'radio_choices_label_setting' ], 10, 2 );
+		add_action( 'gform_field_standard_settings', [ $this, 'tooltip_text_setting' ], 10, 2 );
 		add_action( 'gform_editor_js', [ $this, 'editor_script' ] );
 		add_filter( 'gform_tooltips', [ $this, 'add_tooltip' ] );
 		add_filter( 'gform_field_container', [ $this, 'add_tooltip_markup' ], 10, 6 );
@@ -45,7 +45,7 @@ class Checkbox_Tooltip {
 	 *
 	 * @return void
 	 */
-	public function radio_choices_label_setting( $position, $form_id ) {
+	public function tooltip_text_setting( $position, $form_id ) {
 		if ( 20 === $position ) {
 			?>
 			<li class="field_tooltip_setting field_setting">
