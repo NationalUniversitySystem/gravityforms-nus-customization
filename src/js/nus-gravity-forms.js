@@ -2,6 +2,7 @@
 //=require components/submit-button.js
 //=require components/degree-select.js
 //=require components/country.js
+//=require components/tooltip.js
 
 /* global setActiveClass */
 jQuery( document ).ready( function( $ ) {
