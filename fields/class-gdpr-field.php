@@ -126,6 +126,7 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 				// Old setup so that the value passes through to validation correctly.
 				$input  = '<label class="form__label--checkbox" for="choice_' . $form['id'] . '_' . $this->id . '_1">';
 				$input .= '<input type="checkbox" ';
+				$input .= $disabled_text . ' ';
 				$input .= 'class="' . $input_classes . '"';
 				$input .= 'name="input_' . esc_attr( $this->id ) . '"  value="optIn" ';
 				$input .= 'id="choice_' . $form['id'] . '_' . $this->id . '_1">';
