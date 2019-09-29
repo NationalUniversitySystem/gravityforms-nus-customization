@@ -19,13 +19,11 @@ class Gf_Nus_Markup {
 	 */
 	public function __construct() {
 		// Filters.
-		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
-		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		// add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_content', [ $this, 'modify_field_content' ], 10, 5 );
+		add_filter( 'gform_pre_render', [ $this, 'modify_input_classes' ] );
+		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ], 10, 2 );
-		add_filter( 'gform_form_tag', [ $this, 'form_tag' ], 10, 2 );
-		add_filter( 'gform_field_value_oh_location', [ $this, 'populate_location' ] );
-		add_filter( 'gform_field_value_oh_date', [ $this, 'populate_date' ] );
-		add_filter( 'gform_field_value_oh_track', [ $this, 'populate_track' ] );
 		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
 
 		// Actions.
@@ -43,6 +41,62 @@ class Gf_Nus_Markup {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Create custom HTML form gravity forms
+	 *
+	 * Make the form output fit to our layout/standards
+	 *
+	 * TODO Check radio buttons
+	 * TODO Check datalist functionality
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+	 * @param string $value         Value of the input.
+	 * @param int    $random        Unused parameter? Actual plugin has no documentation on this parameter.
+	 * @param int    $form_id       Field's parent form ID.
+	 */
+	public function modify_field_content( $field_content, $field, $value, $random = 0, $form_id ) {
+		// If is in the admin, leave it be.
+		if ( is_admin() ) {
+			return $field_content;
+		}
+
+		$field_content = $this->replace_front_end_classes( $field_content, $field );
+		$field_content = $this->add_input_attributes( $field_content, $field );
+
+		return $field_content;
+	}
+
+	/**
+	 * Modify the inputs' classes by being sneaky and piggy backing on the "size" option
+	 *
+	 * TODO Simplify the adding of classes to the input on a per field file.
+	 *
+	 * @param array $form The current GF form data.
+	 *
+	 * @return array
+	 */
+	public function modify_input_classes( $form ) {
+		foreach ( $form['fields'] as $key => $field ) {
+			$additional_classes = ' input input--styled';
+
+			switch ( $field->type ) {
+				case 'email':
+				case 'text':
+				case 'textarea':
+					$additional_classes .= ' input--text';
+					break;
+				case 'select':
+					$additional_classes .= ' input--select';
+					break;
+			}
+
+			$form['fields'][ $key ]['size'] .= $additional_classes;
+		}
+
+		return $form;
 	}
 
 	/**
@@ -211,61 +265,53 @@ class Gf_Nus_Markup {
 	}
 
 	/**
-	 * Add default classes to input containers
+	 * Modify the string holding the classes for the container/wrapper of the field
+	 * - Natively the container/wrapper is an li
 	 *
-	 * Setup some default styling so manual entry isn't necessary
+	 * @param string $css_classes Class list for the field container.
+	 * @param object $field       The GF field object with info.
+	 * @param array  $form        The current GF form data.
 	 *
-	 * @param string $field_container The field container's markup.
-	 * @param object $field           The GF field object with info.
-	 * @param array  $form            The current GF form data.
-	 * @param string $css_class       Class list for the field container.
-	 * @param string $style           Style attribute text.
-	 * @param string $field_content   Full field content, including the label.
+	 * @return string
 	 */
-	public function custom_field_container( $field_container, $field, $form, $css_class, $style, $field_content ) {
-		// Get the ID of our field.
-		$id = $field->id;
+	public function modify_field_container_classes( $css_classes, $field, $form ) {
+		// We don't need to modify the admin classes.
+		if ( is_admin() ) {
+			return $css_classes;
+		}
 
 		// Default class for container.
-		$custom_classes = $css_class . ' form__group';
+		$css_classes .= ' form__group';
+
+		// Always add the label as a class.
+		$css_classes .= ' ' . str_replace( ' ', '_', strtolower( $field->label ) );
 
 		// If we have a description, add class to state it.
 		if ( $field->description ) {
-			$custom_classes .= ' has-desc';
+			$css_classes .= ' has-desc';
 		}
 
 		switch ( $field->type ) {
 			case 'select':
-				$custom_classes .= ' form__group--select';
+				$css_classes .= ' form__group--select';
+
+				// If any of the choices is selected, add the active class for label display.
+				$choices_is_selected = array_filter( array_column( $field->choices, 'isSelected' ) );
+
+				if ( ! empty( $choices_is_selected ) ) {
+					$css_classes .= ' form__group--active';
+				}
+
 				break;
 			case 'radio':
-				$custom_classes .= ' form__group--radios';
+				$css_classes .= ' form__group--radios';
 				break;
 			case 'checkbox':
-				$custom_classes .= ' form__group--checkbox';
+				$css_classes .= ' form__group--checkbox';
 				break;
-			default:
-				$custom_classes .= ' ' . str_replace( ' ', '_', strtolower( $field->label ) );
 		}
 
-		// Setup how our field_id is displayed.
-		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
-
-		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="' . $custom_classes . '">{FIELD_CONTENT}</li>';
-	}
-
-	/**
-	 * Remove Gravity Forms stylesheets and unnecessary scripts
-	 *
-	 * Gets rid of the nasty default css by removing the stylesheet and the datalist chosen JS.
-	 */
-	public function dequeue_gf_scripts() {
-		if ( ! is_admin() ) {
-			wp_dequeue_style( 'gforms_formsmain_css' );
-			wp_dequeue_style( 'gforms_browsers_css' );
-			wp_dequeue_script( 'gform_chosen' );
-		}
+		return $css_classes;
 	}
 
 	/**
@@ -274,53 +320,7 @@ class Gf_Nus_Markup {
 	 * Adds aria-alert so screen readers will know something bad happened on failed submit
 	 */
 	public function change_fail_message( $message, $form ) {
-		$new_message = '';
-
-		return $new_message;
-	}
-
-	public function form_tag( $form_tag, $form ) {
-		$form_tag .= '<div role="alert" aria-atomic="true" class="validation_error"></div>';
-
-		return $form_tag;
-	}
-
-	/**
-	 * Populate oh_date hidden field
-	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_location( $value ) {
-		$location      = get_post_meta( get_the_ID(), 'location_select', true );
-		$location_city = get_post_meta( $location, 'city', true );
-
-		return $location_city;
-	}
-
-	/**
-	 * Populate oh_date hidden field
-	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_date( $value ) {
-		$meta = get_post_meta( get_the_ID() );
-		if ( ! empty( $meta['event_details_start_time'][0] ) ) {
-			$start = DateTime::createFromFormat( 'U', $meta['event_details_start_time'][0] );
-			$start->setTimezone( new DateTimeZone( 'America/Los_Angeles' ) );
-			$event_date = $start->format( 'm/d/Y' );
-		}
-		return $event_date;
-	}
-
-	/**
-	 * Populate oh_track hidden field
-	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_track( $value ) {
-		$location      = get_post_meta( get_the_ID(), 'location_select', true );
-		$location_city = get_post_meta( $location, 'city', true );
-		return 'eo-openhouse-' . str_replace( ' ', '-', strtolower( $location_city ) );
+		return str_replace( ' class', '  role="alert" aria-atomic="true" class', $message );
 	}
 
 	/**
@@ -339,5 +339,76 @@ class Gf_Nus_Markup {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Remove Gravity Forms stylesheets and unnecessary scripts
+	 *
+	 * Gets rid of the nasty default css by removing the stylesheet and the datalist chosen JS.
+	 */
+	public function dequeue_gf_scripts() {
+		if ( ! is_admin() ) {
+			wp_dequeue_style( 'gforms_formsmain_css' );
+			wp_dequeue_style( 'gforms_browsers_css' );
+			wp_dequeue_script( 'gform_chosen' );
+		}
+	}
+
+	/**
+	 * Replace default Gravity forms classes for our custom classes
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+
+	 * @return string
+	 */
+	private function replace_front_end_classes( $field_content, $field ) {
+		$label_class   = 'form__label' . ( 'hidden_label' === $field->labelPlacement ? ' sr-only' : '' ); // phpcs:ignore WordPress.NamingConventions
+		$field_content = str_replace( 'gfield_label', $label_class, $field_content );
+
+		$field_content = str_replace( 'gfield_required', 'required-label', $field_content );
+		$field_content = str_replace( 'gfield_description', 'form__description', $field_content );
+
+		return $field_content;
+	}
+
+	/**
+	 * Add additional attributes to fields by string replacement if applicable
+	 * - autocomplete
+	 * - aria-hidden
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+	 *
+	 * @return string
+	 */
+	private function add_input_attributes( $field_content, $field ) {
+		// Setup our autocomplete values - label values on left, autocomplete values on right.
+		$auto_complete_values = [
+			'by_label' => [
+				'first name'    => 'given-name',
+				'last name'     => 'family-name',
+				'name'          => 'name',
+				'email address' => 'email',
+				'email'         => 'email',
+			],
+			'by_type'  => [
+				'email' => 'email',
+			],
+		];
+
+		if ( in_array( strtolower( $field->label ), array_keys( $auto_complete_values['by_label'] ), true ) ) {
+			$autocomplete_value = $auto_complete_values['by_label'][ strtolower( $field->label ) ];
+			$field_content      = str_replace( 'type', ' autocomplete="' . $autocomplete_value . '" type', $field_content );
+		} elseif ( in_array( $field->type, array_keys( $auto_complete_values['by_type'] ), true ) ) {
+			$autocomplete_value = $auto_complete_values['by_type'][ $field->type ];
+			$field_content      = str_replace( 'type', ' autocomplete="' . $autocomplete_value . '" type', $field_content );
+		}
+
+		if ( ! empty( $field->visibility ) && 'hidden' === $field->visibility ) {
+			$field_content = str_replace( 'type', ' aria-hidden="true" type', $field_content );
+		}
+
+		return $field_content;
 	}
 }

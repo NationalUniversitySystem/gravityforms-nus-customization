@@ -126,6 +126,7 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 				// Old setup so that the value passes through to validation correctly.
 				$input  = '<label class="form__label--checkbox" for="choice_' . $form['id'] . '_' . $this->id . '_1">';
 				$input .= '<input type="checkbox" ';
+				$input .= $disabled_text . ' ';
 				$input .= 'class="' . $input_classes . '"';
 				$input .= 'name="input_' . esc_attr( $this->id ) . '"  value="optIn" ';
 				$input .= 'id="choice_' . $form['id'] . '_' . $this->id . '_1">';
@@ -250,7 +251,8 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 * @return string
 		 */
 		public function custom_container_class( $css_class, $field, $form ) {
-			if ( 'gdpr' !== $field->type ) {
+			// If is in the admin or not this field type, leave it be.
+			if ( is_admin() || $this->type !== $field->type ) {
 				return $css_class;
 			}
 
