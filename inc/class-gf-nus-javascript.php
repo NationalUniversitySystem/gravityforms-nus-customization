@@ -44,7 +44,7 @@ class Gf_Nus_Javascript {
 		if ( ! wp_script_is( 'polyfill-service' ) ) {
 			wp_enqueue_script( 'polyfill-service', 'https://polyfill.io/v3/polyfill.min.js?flags=gated&features=Array.prototype.forEach%2CNodeList.prototype.forEach%2CElement.prototype.matches', [], '3.0.0', true );
 		}
-		wp_enqueue_script( 'gravityforms-nus', GF_NUS_URL . '/js/nus-gravity-forms.js', [ 'jquery', 'polyfill-service' ], filemtime( GF_NUS_PATH . '/js/nus-gravity-forms.js' ), true );
+		wp_enqueue_script( 'gravityforms-nus', GF_NUS_URL . 'js/nus-gravity-forms.js', [ 'jquery', 'polyfill-service' ], filemtime( GF_NUS_PATH . 'js/nus-gravity-forms.js' ), true );
 		wp_localize_script( 'gravityforms-nus', 'NuAjaxObject', [ 'ajax_url' => admin_url( 'admin-ajax.php' ) ] );
 	}
 
