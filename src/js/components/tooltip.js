@@ -1,6 +1,6 @@
 ( ( d ) => {
 	d.addEventListener( 'DOMContentLoaded', () => {
-		d.addEventListener( 'mouseenter', function( event ) {
+		d.querySelector( 'body' ).addEventListener( 'mouseenter', function( event ) {
 			if ( event.target.closest( 'span[data-tooltip-content]' ) && event.target.dataset.tooltipContent ) {
 				const tooltip = d.querySelector( event.target.dataset.tooltipContent );
 				tooltip.style.display = 'block';
