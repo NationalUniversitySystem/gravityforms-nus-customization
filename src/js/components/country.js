@@ -25,7 +25,7 @@
 			if ( zipcodeWrapper.length && ( 'US' !== isoCode || 'USA' !== countryName ) ) {
 				zipcodeWrapper.find( 'input' ).val( '00000' );
 				zipcodeWrapper.addClass( 'form__group--active' );
-			} else if ( zipcodeWrapper.length ) {
+			} elseif ( zipcodeWrapper.length ) {
 				zipcodeWrapper.find( 'input' ).val( '' );
 				zipcodeWrapper.removeClass( 'form__group--active' );
 			}
@@ -33,7 +33,7 @@
 	}
 
 	// Set the country
-	$( '.country--select select' ).val( 'USA' ).change();
+	$('.country--select select').val( 'USA' ).change();
 
 	// Set the country code AFTER we add the on change behavior so it actually triggers.
 	$( '.country-code--select select' ).val( '1' ).change();
