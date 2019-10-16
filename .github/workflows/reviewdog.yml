@@ -2,8 +2,8 @@ name: reviewdog
 on:
   pull_request:
     branches:
-      master
-      develop
+      - master
+      - develop
 jobs:
   eslint:
     name: Run eslint
