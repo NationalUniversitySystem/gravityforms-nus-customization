@@ -63,7 +63,10 @@ class Gf_Nus_Markup {
 			return $field_content;
 		}
 
-		$field_content = $this->replace_front_end_classes( $field_content, $field );
+		if ( 'hidden_label' === $field->labelPlacement ) { // phpcs:ignore WordPress.NamingConventions
+			$field_content = str_replace( 'gfield_label', 'gfield_label sr-only', $field_content );
+		}
+
 		$field_content = $this->add_input_attributes( $field_content, $field );
 
 		return $field_content;
@@ -352,24 +355,6 @@ class Gf_Nus_Markup {
 			wp_dequeue_style( 'gforms_browsers_css' );
 			wp_dequeue_script( 'gform_chosen' );
 		}
-	}
-
-	/**
-	 * Replace default Gravity forms classes for our custom classes
-	 *
-	 * @param string $field_content Markup of the field provided by GF.
-	 * @param object $field         GF object with info about the field.
-
-	 * @return string
-	 */
-	private function replace_front_end_classes( $field_content, $field ) {
-		$label_class   = 'form__label' . ( 'hidden_label' === $field->labelPlacement ? ' sr-only' : '' ); // phpcs:ignore WordPress.NamingConventions
-		$field_content = str_replace( 'gfield_label', $label_class, $field_content );
-
-		$field_content = str_replace( 'gfield_required', 'required-label', $field_content );
-		$field_content = str_replace( 'gfield_description', 'form__description', $field_content );
-
-		return $field_content;
 	}
 
 	/**
