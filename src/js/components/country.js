@@ -25,7 +25,7 @@
 			if ( zipcodeWrapper.length && ( 'US' !== isoCode || 'USA' !== countryName ) ) {
 				zipcodeWrapper.find( 'input' ).val( '00000' );
 				zipcodeWrapper.addClass('form__group--active');
-			} else if ( zipcodeWrapper.length ) {
+			} elseif ( zipcodeWrapper.length ) {
 				zipcodeWrapper.find( 'input' ).val( '' );
 				zipcodeWrapper.removeClass( 'form__group--active' );
 			}
