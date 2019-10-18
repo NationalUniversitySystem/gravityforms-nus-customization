@@ -35,6 +35,7 @@ function gf_nus_load() {
 
 	$files_list = [
 		'tracking/class-gf-nus-fb-tracking.php',
+		'/inc/vendor/simplehtmldom/simple_html_dom.php',
 		'inc/class-consent-expansion.php',
 		'inc/class-radio-label-behavior.php',
 		'inc/class-checkbox-tooltip.php',

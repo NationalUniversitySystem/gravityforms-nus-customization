@@ -3,8 +3,6 @@
  * Mod to expand the behavior of displaying the text box of the native Gravity Forms Consent field
  */
 
-// Include simple dom parser to help with html manipulation.
-require GF_NUS_PATH . '/inc/vendor/simplehtmldom/simple_html_dom.php';
 /**
  * Consent_Expansion class
  */
