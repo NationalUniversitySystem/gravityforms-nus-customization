@@ -35,10 +35,11 @@ function gf_nus_load() {
 
 	$files_list = [
 		'tracking/class-gf-nus-fb-tracking.php',
+		'inc/class-consent-expansion.php',
 		'inc/class-radio-label-behavior.php',
 		'inc/class-checkbox-tooltip.php',
 		'inc/class-custom-validation.php',
-		'inc/class-gf-nus-javascript.php',
+		'inc/class-gf-nus-assets.php',
 		'inc/class-gf-nus-markup.php',
 		'inc/class-gf-nus-security.php',
 		'inc/class-national-university-gravityforms.php',
