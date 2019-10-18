@@ -1,0 +1,41 @@
+.gfield_consent_description { // sass-lint:disable-line class-name-format
+  font-size: 11px;
+  line-height: 18px;
+
+  &.consent {
+    &__scroll-window {
+      // sass-lint:disable-block no-vendor-prefixes nesting-depth
+      border: 1px solid #a8adb1;
+      height: 125px;
+      overflow: auto;
+      padding: 15px;
+      position: relative;
+
+      &::-webkit-scrollbar {
+        -webkit-appearance: none;
+
+        &:vertical {
+          width: 8px;
+        }
+
+        &:horizontal {
+          height: 8px;
+        }
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, .5);
+        border: 2px solid rgba(255, 255, 255, 0); // should match background, can't be transparent
+        border-radius: 8px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background-color: rgba(255, 255, 255, 0);
+      }
+    }
+
+    &__below-submit {
+      margin-top: 30px;
+    }
+  }
+}

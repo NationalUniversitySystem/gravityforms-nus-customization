@@ -3,6 +3,7 @@
 //=require components/degree-select.js
 //=require components/country.js
 //=require components/tooltip.js
+//=require components/consent-scroll.js
 
 /* global setActiveClass */
 jQuery( document ).ready( function( $ ) {
