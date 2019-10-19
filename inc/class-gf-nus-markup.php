@@ -75,7 +75,6 @@ class Gf_Nus_Markup {
 	 * Make the form output fit to our layout/standards
 	 *
 	 * TODO Check radio buttons
-	 * TODO Check datalist functionality
 	 *
 	 * @param string $field_content Markup of the field provided by GF.
 	 * @param object $field         GF object with info about the field.
@@ -355,6 +354,11 @@ class Gf_Nus_Markup {
 	 * Update failed form submission message
 	 *
 	 * Adds aria-alert so screen readers will know something bad happened on failed submit
+	 *
+	 * @param string $message The originally set up error message.
+	 * @param array  $form    Array with gravity form data.
+	 *
+	 * @return string
 	 */
 	public function change_fail_message( $message, $form ) {
 		return str_replace( ' class', '  role="alert" aria-atomic="true" class', $message );

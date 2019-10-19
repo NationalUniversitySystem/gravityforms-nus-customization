@@ -46,7 +46,7 @@ class Gf_Nus_Security {
 	 * @param array        $form  The current form object.
 	 */
 	public function gf_custom_save_field_value( $value, $lead, $field, $form ) {
-		$key = $field->formId; // phpcs:disable WordPress.NamingConventions
+		$key = $field->formId; // phpcs:ignore WordPress.NamingConventions.ValidVariableName
 
 		// If the value is blank (no value set, e.g. no utm params).
 		if ( '' === $value ) {
@@ -67,7 +67,7 @@ class Gf_Nus_Security {
 	 * @param string       $input_id The ID of the input being saved or the field ID for single input field types.
 	 */
 	public function gf_custom_decode_field( $value, $entry, $field, $input_id ) {
-		$key = $field->formId; // phpcs:disable WordPress.NamingConventions
+		$key = $field->formId; // phpcs:ignore WordPress.NamingConventions.ValidVariableName
 
 		return GFCommon::openssl_decrypt( $value, $key );
 	}
