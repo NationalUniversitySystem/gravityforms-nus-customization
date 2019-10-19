@@ -20,6 +20,7 @@ class Gf_Nus_Markup {
 	public function __construct() {
 		// Filters.
 		// add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_form_post_get_meta', [ $this, 'switch_enhanced_dropdown_behavior' ] );
 		add_filter( 'gform_field_content', [ $this, 'modify_field_content' ], 10, 5 );
 		add_filter( 'gform_pre_render', [ $this, 'modify_input_classes' ] );
 		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
@@ -44,6 +45,31 @@ class Gf_Nus_Markup {
 	}
 
 	/**
+	 * Switch any field's setup from "enableEnhancedUI" to our custom "enableDatalistSelect"
+	 *
+	 * * This will keep everything from loading the jQuery "chosen" plugin included in Gravity Forms
+	 * * and instead use HTML5 datalist element.
+	 *
+	 * @param array $form Gravity Form array.
+	 *
+	 * @return array
+	 */
+	public function switch_enhanced_dropdown_behavior( $form ) {
+		if ( ! is_admin() && ! empty( $form ) && ! empty( $form['fields'] ) ) {
+			foreach ( $form['fields'] as $field ) {
+				// phpcs:disable WordPress.NamingConventions.ValidVariableName
+				if ( isset( $field->enableEnhancedUI ) && $field->enableEnhancedUI ) {
+					$field->enableDatalistSelect = 1;
+					unset( $field->enableEnhancedUI );
+				}
+				// phpcs:enable WordPress.NamingConventions.ValidVariableName
+			}
+		}
+
+		return $form;
+	}
+
+	/**
 	 * Create custom HTML form gravity forms
 	 *
 	 * Make the form output fit to our layout/standards
@@ -65,6 +91,10 @@ class Gf_Nus_Markup {
 
 		if ( 'hidden_label' === $field->labelPlacement ) { // phpcs:ignore WordPress.NamingConventions
 			$field_content = str_replace( 'gfield_label', 'gfield_label sr-only', $field_content );
+		}
+
+		if ( ! empty( $field->enableDatalistSelect ) ) { // phpcs:ignore WordPress.NamingConventions
+			$field_content = $this->add_enhanced_dropdown( $field_content, $field );
 		}
 
 		$field_content = $this->add_input_attributes( $field_content, $field );
@@ -355,6 +385,42 @@ class Gf_Nus_Markup {
 			wp_dequeue_style( 'gforms_browsers_css' );
 			wp_dequeue_script( 'gform_chosen' );
 		}
+	}
+
+	/**
+	 * Manipulate the HTML to replace the SELECT element with the DATALIST element,
+	 * and set up the options accordingly.
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+	 *
+	 * @return string
+	 */
+	private function add_enhanced_dropdown( $field_content, $field ) {
+		$field_content_dom = str_get_html( $field_content );
+		$select_field      = $field_content_dom->find( 'select', 0 );
+
+		if ( $select_field ) {
+			$datalist_dom                 = str_get_html( '<datalist></datalist>' );
+			$data_list_element            = $datalist_dom->find( 'datalist', 0 );
+			$data_list_element->id        = $select_field->id . '-list';
+			$data_list_element->innertext = $select_field->innertext;
+
+			$select_field->list      = $select_field->id . '-list';
+			$select_field->innertext = '';
+			$select_field->tag       = 'input';
+
+			$select_field->outertext .= $data_list_element;
+
+			$datalist_dom->clear();
+			unset( $datalist_dom );
+		}
+
+		$field_content = $field_content_dom->save();
+		$field_content_dom->clear();
+		unset( $field_content_dom );
+
+		return $field_content;
 	}
 
 	/**
