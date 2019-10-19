@@ -93,6 +93,10 @@ class Gf_Nus_Markup {
 			$field_content = str_replace( 'gfield_label', 'gfield_label sr-only', $field_content );
 		}
 
+		if ( 'select' === $field->type && ! empty( $field->placeholder ) ) {
+			$field_content = $this->disable_select_placeholder( $field_content, $field );
+		}
+
 		if ( ! empty( $field->enableDatalistSelect ) ) { // phpcs:ignore WordPress.NamingConventions
 			$field_content = $this->add_enhanced_dropdown( $field_content, $field );
 		}
@@ -385,6 +389,29 @@ class Gf_Nus_Markup {
 			wp_dequeue_style( 'gforms_browsers_css' );
 			wp_dequeue_script( 'gform_chosen' );
 		}
+	}
+
+	/**
+	 * Disable the placeholder in a dropdown so that it can't be chosen again after initial interaction.
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+	 *
+	 * @return string
+	 */
+	private function disable_select_placeholder( $field_content, $field ) {
+		$field_content_dom  = str_get_html( $field_content );
+		$placeholder_option = $field_content_dom->find( 'option.gf_placeholder', 0 );
+
+		if ( $placeholder_option && $placeholder_option->selected ) {
+			$placeholder_option->disabled = 'disabled';
+		}
+
+		$field_content = $field_content_dom->save();
+		$field_content_dom->clear();
+		unset( $field_content_dom );
+
+		return $field_content;
 	}
 
 	/**
