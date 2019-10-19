@@ -1,0 +1,7 @@
+.gfield_radio { // sass-lint:disable-line class-name-format
+  [class^='gchoice'] {
+    input {
+      margin-right: 5px;
+    }
+  }
+}

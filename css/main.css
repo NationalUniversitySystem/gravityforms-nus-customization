@@ -36,3 +36,7 @@
 .gfield_consent_description.consent__below-submit {
   margin-top: 30px;
 }
+
+.gfield_radio [class^='gchoice'] input {
+  margin-right: 5px;
+}
