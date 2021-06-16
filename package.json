@@ -14,7 +14,7 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.14.3",
-    "@babel/preset-env": "^7.14.4",
+    "@babel/preset-env": "^7.14.5",
     "@babel/register": "^7.13.16",
     "axios": "^0.21.1",
     "del": "^6.0.0",
