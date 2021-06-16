@@ -22,10 +22,12 @@ class Nu_Honey_Field extends GF_Field_Text {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_action( 'gform_addon_pre_process_feeds', array( $this, 'stop_spam' ), 10, 3 );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_action( 'gform_addon_pre_process_feeds', [ $this, 'stop_spam' ], 10, 3 );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_entry_detail_meta_boxes', [ $this, 'register_meta_box' ], 10, 3 );
+		add_filter( 'gform_entry_meta', [ $this, 'meta_column' ], 10, 2 );
 	}
 
 	/**
@@ -34,7 +36,19 @@ class Nu_Honey_Field extends GF_Field_Text {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Honeypot', 'national-university' );
+		return esc_attr__( 'Honeypot', 'national-university' );
+	}
+
+	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
 	}
 
 	/**
@@ -53,6 +67,8 @@ class Nu_Honey_Field extends GF_Field_Text {
 
 	/**
 	 * Stop webhooks if honeypot filled
+	 * If the field doesn't exist on the form, or if the field is blank, run our webhooks.
+	 * Else do not run any of the feeds by returning a blank $feeds array and update the metadata of the field so it's easier to track these entries.
 	 *
 	 * @param array $feeds An array of $feed objects.
 	 * @param array $entry Current entry for which feeds will be processed.
@@ -65,12 +81,12 @@ class Nu_Honey_Field extends GF_Field_Text {
 		$honeypot = $this->get_value_by_label( $form, $entry, 'Form Email Field' );
 		$honeypot = trim( $honeypot );
 
-		// If the field doesn't exist on the form, or if the field is blank, run our webhooks.
 		if ( false === $honeypot || '' === $honeypot ) {
 			return $feeds;
 		} else {
-			// Else do not run any of the feeds.
-			die();
+			gform_update_meta( $entry['id'], 'killed_feeds_status', '1' );
+
+			return [];
 		}
 	}
 
@@ -98,20 +114,20 @@ class Nu_Honey_Field extends GF_Field_Text {
 
 		if ( $field->description ) {
 			// If field has a description FOR SCREEN READERS.
-			$content .= '<span class="form__description sr-only" id="' . $name . '_desc">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
+			$content .= '<span class="form__description sr-only">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
 		}
 
 		$content .= '<label class="form__label" for="input_' . $form_id . '_' . $field->id . '">' . $field->label . '</label>';
 
-		$content .= '<input class="input input--text input--styled" type="text" ';
-		$content .= 'name="' . $name . '" ';
-		$content .= 'value="" id="input_' . $form_id . '_' . $field->id . '" ';
-		$content .= 'autocomplete="off">';
+		$content .= '<input class="input input--text input--styled" type="text"';
+		$content .= ' name="' . $name . '"';
+		$content .= ' value="" id="input_' . $form_id . '_' . $field->id . '"';
+		$content .= ' autocomplete="off">';
 
 		// If field has a description.
 		if ( $field->description ) {
 			// Then lets show it.
-			$content .= '<span class="form__description" aria-hidden="true">' . $field->description . '</span>';
+			$content .= '<span class="form__description" id="' . $name . '_desc" aria-hidden="true">' . $field->description . '</span>';
 		}
 
 		return $content;
@@ -155,6 +171,71 @@ class Nu_Honey_Field extends GF_Field_Text {
 	}
 
 	/**
+	 * Register a meta box that will display whether or not the feeds were killed due to the field.
+	 *
+	 * @param array $meta_boxes The properties for the meta boxes.
+	 * @param array $entry      The entry currently being viewed/edited.
+	 * @param array $form       The form object used to process the current entry.
+	 *
+	 * @return array
+	 */
+	public function register_meta_box( $meta_boxes, $entry, $form ) {
+		// If the form/entry doesn't have the field, don't register the meta box.
+		$field_id = $this->get_field_id( $form, 'nu_honey' );
+
+		if ( false === $field_id || ! isset( $entry[ $field_id ] ) ) {
+			return $meta_boxes;
+		}
+
+		$meta_boxes['killed_feeds'] = [
+			'title'       => 'Killed Feeds?',
+			'description' => 'Whether the feeds (webhooks) were killed due to the custom honey pot field.',
+			'context'     => 'side',
+			'callback'    => [ $this, 'add_killed_feeds_box' ],
+		];
+
+		return $meta_boxes;
+	}
+
+	/**
+	 * Display our meta box
+	 *
+	 * - Displays the SOAR UUID or a button to run the SOAR submission.
+	 *
+	 * @param array $args Gravity forms data for the entry + form.
+	 *
+	 * @return void
+	 */
+	public function add_killed_feeds_box( $args ) {
+		$entry_id     = $args['entry']['id'];
+		$feeds_status = gform_get_meta( $entry_id, 'killed_feeds_status' );
+
+		if ( ! empty( $feeds_status ) ) {
+			echo '<p>Entry <strong>does contain</strong> the metadata signaling it was stopped by the honey field.</p>';
+		} else {
+			echo '<p>Entry does <strong>NOT</strong> contain the metadata signaling it was stopped by the honey field.</p>';
+		}
+	}
+
+	/**
+	 * Add the soarUUID as a column option when viewing entries listing
+	 *
+	 * @param array   $entry_meta Entry meta array.
+	 * @param integer $form_id    The ID of the form from which the entry value was submitted.
+	 *
+	 * @return array
+	 */
+	public function meta_column( $entry_meta, $form_id ) {
+		$entry_meta['killed_feeds_status'] = [
+			'label'             => 'Killed Feeds?',
+			'is_numeric'        => false,
+			'is_default_column' => false,
+		];
+
+		return $entry_meta;
+	}
+
+	/**
 	 * Gets the field value from the label
 	 * - https://www.gravitygeek.com/knowledge-base/how-to-get-entry-value-by-label/
 	 *
@@ -168,6 +249,22 @@ class Nu_Honey_Field extends GF_Field_Text {
 
 			if ( strtolower( $lead_key ) === strtolower( $label ) ) {
 				return $entry[ $field->id ];
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Gets the field ID from the type
+	 *
+	 * @param array  $form  GF data of form.
+	 * @param string $value Value we are trying to find inside the form.
+	 * @param string $key   The type we are trying to find.
+	 */
+	private function get_field_id( $form, $value, $key = 'type' ) {
+		foreach ( $form['fields'] as $field ) {
+			if ( strtolower( $field->$key ) === strtolower( $value ) ) {
+				return $field->id;
 			}
 		}
 		return false;

@@ -1,34 +1,44 @@
-//=require components/functions.js
+//=require functions/utility.js
+//=require functions/validation.js
 //=require components/submit-button.js
 //=require components/degree-select.js
 //=require components/country.js
+//=require components/live-validation.js
+//=require components/military-tooltip.js
 
 /* global setActiveClass */
-jQuery( document ).ready( function( $ ) {
-
+( function( d ) {
 	/**
 	 * Default year and month and country for forms
 	 *
-	 * Auto populates month and year selects with current month and year, country select with USA
+	 * Auto populates month and year selects with current month and year
 	 */
 
-	// Create array of month names
 	var monthNames = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUNE', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC' ];
-
-	// Create a new date var
-	var d = new Date();
+	var date = new Date();
 
 	// Get the month number, correspond to our array data
-	var n = monthNames[ d.getMonth() ];
+	var currentMonth = monthNames[ date.getMonth() ];
 
 	// Get the year
-	var y = d.getFullYear();
+	var currentYear = date.getFullYear();
 
-	// Set the month
-	$( '.form__group--month select' ).val( n ).change();
+	var monthSelects = d.querySelectorAll( '.form__group--month select' );
+	var yearSelects = d.querySelectorAll( '.form__group--year select' );
 
-	// Set the year
-	$( '.form__group--year select' ).val( y ).change();
+	if ( monthSelects.length ) {
+		monthSelects.forEach( function( element ) {
+			element.value = currentMonth;
+			element.dispatchEvent( new Event( 'change' ) );
+		} );
+	}
+
+	if ( yearSelects.length ) {
+		yearSelects.forEach( function( element ) {
+			element.value = currentYear;
+			element.dispatchEvent( new Event( 'change' ) );
+		} );
+	}
 
 	// Check for active fields first, so it doesn't look terrible
 	setActiveClass();
@@ -38,11 +48,12 @@ jQuery( document ).ready( function( $ ) {
 	 *
 	 * Sets labels to active state when form is autofilled by the browser
 	 */
-	$( 'input' ).bind( 'input', function() {
-		$( this ).closest( 'li' ).addClass( 'form__group--active' );
-	} );
-
-	$( 'select' ).bind( 'select', function() {
-		$( this ).closest( 'li' ).addClass( 'form__group--active' );
-	} );
-} );
+	var gformFields = d.querySelectorAll( '.gform_body input:not(.gform_hidden), .gform_body select:not(.gform_hidden)' );
+	if ( gformFields.length ) {
+		gformFields.forEach( function( gformInput ) {
+			gformInput.addEventListener( 'change', function() {
+				gformInput.closest( 'li' ).classList.add( 'form__group--active' );
+			} );
+		} );
+	}
+} )( document );

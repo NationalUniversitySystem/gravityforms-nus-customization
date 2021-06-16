@@ -22,11 +22,11 @@ class Nu_Zip_Field extends GF_Field_Text {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_action( 'gform_pre_submission', array( $this, 'add_state' ), 10, 1 );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
-		add_filter( 'gform_field_validation', array( $this, 'validate_field' ), 10, 4 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_action( 'gform_pre_submission', [ $this, 'add_state' ], 10, 1 );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_field_validation', [ $this, 'validate_field' ], 10, 4 );
 	}
 
 	/**
@@ -35,7 +35,19 @@ class Nu_Zip_Field extends GF_Field_Text {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Zip Code', 'national-university' );
+		return esc_attr__( 'Zip Code', 'national-university' );
+	}
+
+	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
 	}
 
 	/**
@@ -67,24 +79,20 @@ class Nu_Zip_Field extends GF_Field_Text {
 
 		// We need both IDs so we can fetch the zipcode from the submission and set the state.
 		if ( false !== $zipcode_id && false !== $state_id ) {
-			// If the form has a zipcode field, fetch it,
-			// then try to get the state with the USPS API and add state to form submission if found.
+			// Fetch both zipcode and state fields.
+			// If state is empty somehow (should have been filled in the front-end)
+			// Then try to get the state with the USPS API and add state to form submission if found.
+			// If the USPS API fails, use the WP DB values as a fallback.
 			$zipcode = rgpost( 'input_' . $zipcode_id );
+			$state   = rgpost( 'input_' . $state_id );
 
-			if ( '00000' !== $zipcode ) {
-				$fetch_url  = 'https://secure.shippingapis.com/ShippingApi.dll?API=CityStateLookup&XML=';
-				$fetch_url .= '<CityStateLookupRequest USERID="951NATIO1026"><ZipCode ID="0"><Zip5>' . $zipcode . '</Zip5></ZipCode></CityStateLookupRequest>';
-				$response   = vip_safe_wp_remote_get( $fetch_url, '', 3, 3 );
+			if ( '00000' !== $zipcode && empty( $state ) ) {
+				$api_response = $this->fetch_usps_api( $zipcode );
 
-				if ( is_array( $response ) ) {
-					$response_body  = $response['body'];
-					$response_xml   = simplexml_load_string( $response_body );
-					$response_json  = wp_json_encode( $response_xml );
-					$response_array = json_decode( $response_json, true );
+				if ( ! is_wp_error( $api_response ) ) {
+					$_POST[ 'input_' . $state_id ] = $api_response['state'];
 
-					if ( ! empty( $response_array['ZipCode'] ) && ! empty( $response_array['ZipCode']['State'] ) ) {
-						$_POST[ 'input_' . $state_id ] = $response_array['ZipCode']['State'];
-					}
+					return;
 				}
 			}
 		}
@@ -107,42 +115,42 @@ class Nu_Zip_Field extends GF_Field_Text {
 			return $field_content;
 		}
 
-		$content   = '';
-		$aria_desc = '';
+		$content = '';
 
 		// If field is set to require in admin add our required html so Gravity Forms knows what to do.
-		$required_aria = ( true === $field->isRequired ) ? 'aria-required="true"' : 'aria-required="false"'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_attr = ( true === $field->isRequired ) ? ' required' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// Get our input ID to use throughout.
 		$name = 'input_' . esc_attr( $field->id );
 
 		if ( $field->description ) {
 			// If field has a description FOR SCREEN READERS.
-			$content .= '<span class="form__description sr-only" id="' . $name . '_desc">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
-			// If field has a description, use it as the aria description as well.
-			$aria_desc = ' aria-describedby="' . $name . '_desc"';
+			$content .= '<span class="form__description sr-only">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
 		}
 
+		$aria_describedby = $name . '_desc';
+
 		// Define the html for our input's label.
-		$label_class = 'form__label' . ( 'hidden_label' === $field->labelPlacement ? ' sr-only' : '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$label_class = 'form__label' . ( 'hidden_label' === $field->labelPlacement ? ' sr-only' : '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$content    .= '<label class="' . $label_class . '" for="input_' . $form_id . '_' . $field->id . '">' . $field->label . $required . '</label>';
 
 		$placeholder = ! empty( $field->placeholder ) ? ' placeholder="' . $field->placeholder . '"' : '';
 		$content    .= sprintf(
-			'<input type="text" class="input input--text input--styled" name="%1$s" value="%2$s" id="input_%3$s_%4$s" autocomplete="postal-code"%5$s%6$s>',
+			'<input type="text" class="input input--text input--styled" name="%1$s" value="%2$s" id="input_%3$s_%4$s" autocomplete="postal-code"%5$s%6$s aria-describedby="%7$s">',
 			$name,
 			esc_attr( $value ),
 			$form_id,
 			$field->id,
-			$required_aria,
-			$placeholder
+			$required_attr,
+			$placeholder,
+			$aria_describedby
 		);
 
 		// If field has a description.
 		if ( $field->description ) {
 			// Then lets show it.
-			$content .= '<span class="form__description" aria-hidden="true">' . $field->description . '</span>';
+			$content .= '<span class="form__description" id="' . $name . '_desc" aria-hidden="true">' . $field->description . '</span>';
 		}
 
 		return $content;
@@ -195,14 +203,37 @@ class Nu_Zip_Field extends GF_Field_Text {
 	 */
 	public function validate_field( $result, $value, $form, $field ) {
 		$pattern = '/^\d{5}$/';
-		if ( ! is_array( $value ) && 'nu_zip' === $field->type && ! preg_match( $pattern, $value ) ) {
-			$result['is_valid'] = false;
-			$result['message']  = 'Please enter a valid Zip';
+
+		/**
+		 * Insight:
+		 * - In order to run our checks for this field we need the following:
+		 * -- has to be a string
+		 * -- has to be either 'nu_zip' field type OR has the class 'nus-live-validation--zip'
+		 * -- must not be the the value '00000' (international zip value)
+		 */
+		if (
+			is_string( $value )
+			&& (
+				'nu_zip' === $field->type
+				|| false !== strpos( $field->cssClass, 'nus-live-validation--zip' ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			)
+			&& '00000' !== $value
+		) {
+			if ( 5 !== strlen( $value ) || ! preg_match( $pattern, $value ) ) {
+				$result['is_valid'] = false;
+				$result['message']  = 'Please enter a valid Zip';
+			} else {
+				$api_response = $this->fetch_usps_api( $value );
+
+				if ( is_wp_error( $api_response ) ) {
+					$result['is_valid'] = false;
+					$result['message']  = $api_response->get_error_message();
+				}
+			}
 		}
 
 		return $result;
 	}
-
 
 	/**
 	 * Gets the field ID from the type
@@ -218,5 +249,77 @@ class Nu_Zip_Field extends GF_Field_Text {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Fetch a response from the USPS API with the zipcode as the value to check against.
+	 *
+	 * @param string $zipcode Value to search in the API.
+	 * @return WP_Error|Array
+	 */
+	private function fetch_usps_api( $zipcode ) {
+		$fetch_url  = 'https://secure.shippingapis.com/ShippingApi.dll?API=CityStateLookup&XML=';
+		$fetch_url .= '<CityStateLookupRequest USERID="951NATIO1026"><ZipCode ID="0"><Zip5>' . $zipcode . '</Zip5></ZipCode></CityStateLookupRequest>';
+		$response   = vip_safe_wp_remote_get( $fetch_url, '', 3, 3 );
+
+		if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+			$response_body  = wp_remote_retrieve_body( $response );
+			$response_xml   = simplexml_load_string( $response_body );
+			$response_json  = wp_json_encode( $response_xml );
+			$response_array = $this->array_change_key_case_recursive( json_decode( $response_json, true ) );
+
+			if ( ! empty( $response_array['zipcode'] ) && ! empty( $response_array['zipcode']['state'] ) ) {
+				$response = $response_array['zipcode'];
+			} elseif ( isset( $response_array['zipcode']['error'], $response_array['zipcode']['error']['description'] ) ) {
+				$response = new WP_Error( 'error', $response_array['zipcode']['error']['description'] );
+			}
+		} else {
+			$response = $this->zip_db_lookup( $zipcode );
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Check for data corresponding to the zipcode
+	 *
+	 * @param string $zip_value The zipcode to search for in the DB.
+	 *
+	 * @return WP_Error|Array
+	 */
+	private function zip_db_lookup( $zip_value ) {
+		global $wpdb;
+
+		$result = $wpdb->get_row( $wpdb->prepare( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			'SELECT * FROM `%1$s` WHERE zipcode = %2$s', // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
+			'wp_zip_data', // Table is top level (not site ID dependent) so not using the wpdb->prefix concatenation.
+			$zip_value
+		), ARRAY_A );
+
+		// If the zipcode was actually not found (the table only stores actual existing zipcodes).
+		if ( ! $result ) {
+			$result = new WP_Error( 'empty', 'The zipcode was not found.' );
+		} elseif ( empty( $result['state'] ) ) { // If the result didn't have state data.
+			$result = new WP_Error( 'invalid', 'Invalid zipcode provided.' );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Utility function to lower case keys in a multidimensional array
+	 *
+	 * @param array $array The multidimensional array in question.
+	 * @param const $case Lower or upper case (CASE_UPPER|CASE_LOWER).
+	 *
+	 * @return array
+	 */
+	private static function array_change_key_case_recursive( $array, $case = CASE_LOWER ) {
+		return array_map( function( $item ) use ( $case ) {
+			if ( is_array( $item ) ) {
+				$item = self::array_change_key_case_recursive( $item, $case );
+			}
+			return $item;
+		}, array_change_key_case( $array, $case ) );
 	}
 }

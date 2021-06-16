@@ -52,6 +52,8 @@
 							// Choose our previously chosen program, before the form re-rendered after failed validation
 							$( '.program--select select' ).val( program );
 
+							$( '.country-code--select select' ).val( countryCode );
+
 							setActiveClass();
 
 							break;
@@ -71,6 +73,7 @@
 		 */
 		// Set global variable
 		var program;
+		var countryCode;
 
 		// When a program is selected
 		$( document ).on( 'change', '.program--select select', function() {
@@ -78,6 +81,19 @@
 			// Store that program's value in the variable for use elsewhere
 			program = $( '.program--select select' ).val();
 
+		} );
+
+		// When a country code is selected
+		$( document ).on( 'change', '.country-code--select', function() {
+
+			// Store that value in the variable for use elsewhere
+			countryCode = $( '.country-code--select select' ).val();
+
+		} );
+
+		// Since country code has a pre-selected default, also get the value on load.
+		$( function() {
+			countryCode = $( '.country-code--select select' ).val();
 		} );
 
 		/**
@@ -128,7 +144,7 @@
 			$( '.gfield_error input, .gfield_error select' ).attr( 'aria-invalid', 'true' );
 
 			if ( $( '#gform_wrapper_' + formId ).hasClass( 'gform_validation_error' ) ) {
-				$( '#gform_' + formId + ' .validation_error' ).html( 'There was a problem with your submission. Errors have been highlighted below.' );
+				$( '#gform_' + formId + ' .validation_error' ).html( '<span class="heading--four">There was a problem with your submission.</span> Errors have been highlighted below.' );
 			}
 
 		} );

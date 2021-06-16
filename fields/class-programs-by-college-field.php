@@ -23,12 +23,12 @@ class Programs_By_College_Field extends GF_Field_Select {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
 
-		add_filter( 'gform_pre_render', array( $this, 'populate_choices' ) );
-		add_filter( 'gform_pre_validation', array( $this, 'populate_choices' ) );
-		add_filter( 'gform_pre_submission_filter', array( $this, 'populate_choices' ) );
-		add_filter( 'gform_admin_pre_render', array( $this, 'populate_choices' ) );
+		add_filter( 'gform_pre_render', [ $this, 'populate_choices' ] );
+		add_filter( 'gform_pre_validation', [ $this, 'populate_choices' ] );
+		add_filter( 'gform_pre_submission_filter', [ $this, 'populate_choices' ] );
+		add_filter( 'gform_admin_pre_render', [ $this, 'populate_choices' ] );
 	}
 
 	/**
@@ -41,15 +41,15 @@ class Programs_By_College_Field extends GF_Field_Select {
 	}
 
 	/**
-	 * Assign the field button to a fields group.
+	 * Assign the field button to the Custom Fields group.
 	 *
 	 * @return array
 	 */
 	public function get_form_editor_button() {
-		return array(
-			'group' => 'standard_fields',
+		return [
+			'group' => 'nu_fields',
 			'text'  => $this->get_form_editor_field_title(),
-		);
+		];
 	}
 
 	/**
@@ -58,7 +58,7 @@ class Programs_By_College_Field extends GF_Field_Select {
 	 * @return array
 	 */
 	public function get_form_editor_field_settings() {
-		return array(
+		return [
 			'conditional_logic_field_setting',
 			'prepopulate_field_setting',
 			'error_message_setting',
@@ -76,7 +76,7 @@ class Programs_By_College_Field extends GF_Field_Select {
 			'description_setting',
 			'css_class_setting',
 			'college_setting', // Custom setting defined in this class.
-		);
+		];
 	}
 
 	/**
@@ -111,7 +111,7 @@ class Programs_By_College_Field extends GF_Field_Select {
 		$css_class          = trim( esc_attr( $class ) . ' input input--select input--styled' );
 		$tabindex           = $this->get_tabindex();
 		$disabled_text      = $is_form_editor ? 'disabled="disabled"' : '';
-		$required_attribute = $this->isRequired ? 'aria-required="true"' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_attribute = $this->isRequired ? 'required' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$invalid_attribute  = $this->failed_validation ? 'aria-invalid="true"' : 'aria-invalid="false"';
 
 		return sprintf(
@@ -132,7 +132,7 @@ class Programs_By_College_Field extends GF_Field_Select {
 	 * @return string
 	 */
 	private static function get_college_option_fields() {
-		$colleges_args = array(
+		$colleges_args = [
 			'post_type'              => 'college',
 			'posts_per_page'         => 50,
 			'order'                  => 'ASC',
@@ -140,7 +140,7 @@ class Programs_By_College_Field extends GF_Field_Select {
 			'no_found_rows'          => true,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
-		);
+		];
 
 		$colleges_query = new WP_Query( $colleges_args );
 
@@ -176,7 +176,7 @@ class Programs_By_College_Field extends GF_Field_Select {
 		$is_admin        = $is_form_editor || $is_entry_detail;
 		$required_class  = $is_admin ? 'gfield_required' : 'required-label';
 
-		$required_div = $is_admin || $this->isRequired ? sprintf( "<span class='%s'>%s</span>", $required_class, $this->isRequired ? '*' : '' ) : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_div = $is_admin || $this->isRequired ? sprintf( "<span class='%s'>%s</span>", $required_class, $this->isRequired ? '*' : '' ) : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		$admin_buttons = $this->get_admin_buttons();
 
@@ -240,13 +240,13 @@ class Programs_By_College_Field extends GF_Field_Select {
 				</label>
 				<select name='college_choice' id="college_choice" onchange="SetFieldProperty('college_id_for_programs', this.value);">
 					<?php
-					echo wp_kses( self::get_college_option_fields(), array(
-						'option' => array(
-							'value'    => array(),
-							'selected' => array(),
-							'disabled' => array(),
-						),
-					) );
+					echo wp_kses( self::get_college_option_fields(), [
+						'option' => [
+							'value'    => [],
+							'selected' => [],
+							'disabled' => [],
+						],
+					] );
 					?>
 				</select>
 				<!-- <input type="checkbox" id="field_encrypt_value" onclick="SetFieldProperty('encryptField', this.checked);" /> encrypt field value -->
@@ -321,9 +321,9 @@ class Programs_By_College_Field extends GF_Field_Select {
 				continue;
 			}
 
-			$choices = array();
+			$choices = [];
 
-			$programs_args = array(
+			$programs_args = [
 				'post_type'              => 'program',
 				'posts_per_page'         => 100,
 				'order'                  => 'ASC',
@@ -333,15 +333,15 @@ class Programs_By_College_Field extends GF_Field_Select {
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
-			);
+			];
 
 			$programs_query = new WP_Query( $programs_args );
 
 			foreach ( $programs_query->posts as $post ) {
-				$choices[] = array(
+				$choices[] = [
 					'text'  => $post->post_title,
 					'value' => $post->post_title,
-				);
+				];
 			}
 
 			$field->choices = $choices;

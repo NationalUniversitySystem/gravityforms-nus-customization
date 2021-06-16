@@ -1,5 +1,11 @@
 <?php
+/**
+ * Handle markup modifications
+ */
 
+/**
+ * Gf_Nus_Markup class
+ */
 class Gf_Nus_Markup {
 	/**
 	 * Instance of this class
@@ -13,18 +19,12 @@ class Gf_Nus_Markup {
 	 */
 	public function __construct() {
 		// Filters.
-		add_filter( 'gform_submit_button', array( $this, 'form_submit_button' ), 10, 2 );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 6 );
-		add_filter( 'gform_validation_message', array( $this, 'change_fail_message' ), 10, 2 );
-		add_filter( 'gform_form_tag', array( $this, 'form_tag' ), 10, 2 );
-		add_filter( 'gform_field_value_oh_location', array( $this, 'populate_location' ) );
-		add_filter( 'gform_field_value_oh_date', array( $this, 'populate_date' ) );
-		add_filter( 'gform_field_value_oh_track', array( $this, 'populate_track' ) );
-		add_filter( 'gform_field_value_formID', array( $this, 'populate_form_id' ) );
-
-		// Actions.
-		add_action( 'gform_enqueue_scripts', array( $this, 'dequeue_gf_scripts' ), 11 );
+		add_filter( 'gform_get_form_filter', [ $this, 'add_role_to_list_tag' ] );
+		add_filter( 'gform_field_content', [ $this, 'fix_checkbox_ul' ], 10, 2 );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ] );
+		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
 	}
 
 	/**
@@ -41,17 +41,30 @@ class Gf_Nus_Markup {
 	}
 
 	/**
-	 * Modify Gravity Forms submit button html
+	 * Add a role attribute to the fields list tag for a11y purposes.
+	 * Since it would be a whole rewrite of the plugin itself to just remove
+	 * the list elements, this is the other alternative.
 	 *
-	 * Make it pretty
+	 * @param string $form_string Full markup of the form.
 	 *
-	 * @param string $button_input GF generated button markup.
-	 * @param array  $form   array The GForm field information.
+	 * @return string
 	 */
-	public function form_submit_button( $button_input, $form ) {
-		$button_text = ! empty( $form['button']['text'] ) ? $form['button']['text'] : 'Request Info';
+	public function add_role_to_list_tag( $form_string ) {
+		return str_replace( ' id=\'gform_fields', ' role="presentation" id=\'gform_fields', $form_string );
+	}
 
-		return "<button class='btn btn--bg-gold btn--navy icon icon--arrow-right icon--margin-left' id='gform_submit_button_{$form['id']}'><span>{$button_text}</span></button>";
+	/**
+	 * Give role attribute to checkbox UL tag for a11y purposes.
+	 *
+	 * @param string $field_content Markup of the field provided by GF.
+	 * @param object $field         GF object with info about the field.
+	 */
+	public function fix_checkbox_ul( $field_content, $field ) {
+		if ( ! in_array( $field->type, [ 'checkbox', 'military' ], true ) ) {
+			return $field_content;
+		}
+
+		return str_replace( ' class=\'gfield_checkbox\'', ' role="presentation" class=\'gfield_checkbox\'', $field_content );
 	}
 
 	/**
@@ -72,13 +85,13 @@ class Gf_Nus_Markup {
 		}
 
 		// Setup our autocomplete values - label values on left, autocomplete values on right.
-		$auto_complete_values = array(
+		$auto_complete_values = [
 			'First Name'    => 'given-name',
 			'Last Name'     => 'family-name',
 			'Name'          => 'name',
 			'Email Address' => 'email',
 			'Email'         => 'email',
-		);
+		];
 
 		$name               = 'input_' . esc_attr( $field->id ); // Get our input ID to use throughout.
 		$content            = ''; // Create var to modify/use down the page.
@@ -86,8 +99,8 @@ class Gf_Nus_Markup {
 		$autocomplete_value = ''; // Setup blank autocomplete default value.
 
 		// If field is set to require in admin dd our required html so Gravity Forms knows what to do.
-		$required_aria = ( true === $field->isRequired ) ? ' aria-required="true"' : ' aria-required="false"'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_attr = ( true === $field->isRequired ) ? ' required' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// See if our label is in our autocomplete array.
 		if ( in_array( $field->label, array_keys( $auto_complete_values ), true ) ) {
@@ -98,11 +111,11 @@ class Gf_Nus_Markup {
 		// If field has a description, use it as the aria description and create markup for screen readers.
 		if ( $field->description ) {
 			$aria_desc = ' aria-describedby="' . $name . '_desc"';
-			$content  .= '<span class="form__description sr-only"  id="' . $name . '_desc">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
+			$content  .= '<span class="form__description sr-only">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
 		}
 
 		// Define the html for our input's label.
-		$label_class = 'form__label' . ( 'hidden_label' === $field->labelPlacement ? ' sr-only' : '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$label_class = 'form__label' . ( 'hidden_label' === $field->labelPlacement ? ' sr-only' : '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$content    .= ! empty( $field->label ) ? '<label class="' . $label_class . '" for="input_' . $form_id . '_' . $field->id . '">' . $field->label . $required . '</label>' : '';
 
 		// Output different html for inputs depending on their type.
@@ -118,7 +131,7 @@ class Gf_Nus_Markup {
 					$form_id,
 					$field->id,
 					$aria_desc,
-					$required_aria,
+					$required_attr,
 					$aria_hidden,
 					$autocomplete_value,
 					$placeholder
@@ -134,7 +147,7 @@ class Gf_Nus_Markup {
 					esc_textarea( $value ),
 					'input_' . $form_id . '_' . $field->id,
 					$autocomplete_value,
-					$required_aria,
+					$required_attr,
 					$placeholder
 				);
 				break;
@@ -153,13 +166,12 @@ class Gf_Nus_Markup {
 					}
 				}
 
-				if ( ! $field->enableEnhancedUI ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-					$content .= '<select ';
-					$content .= 'class="input input--select input--styled" ';
-					$content .= 'name="' . $name . '" ';
-					$content .= $required_aria;
-					$content .= ' value="' . esc_attr( $value );
-					$content .= '" id="input_' . $form_id . '_' . $field->id . '">';
+				if ( ! $field->enableEnhancedUI ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+					$content .= '<select';
+					$content .= ' class="input input--select input--styled"';
+					$content .= ' name="' . $name . '"';
+					$content .= $required_attr;
+					$content .= ' id="input_' . $form_id . '_' . $field->id . '">';
 					$content .= $choices;
 					$content .= '</select>';
 				} else {
@@ -168,7 +180,7 @@ class Gf_Nus_Markup {
 						'input_' . $field->id . '_' . $field->id . '-list',
 						'input_' . $field->id . '_' . $field->id,
 						$name,
-						$required_aria
+						$required_attr
 					);
 					$content .= '<datalist id="input_' . $field->id . '_' . $field->id . '-list" >';
 					$content .= $choices;
@@ -190,29 +202,33 @@ class Gf_Nus_Markup {
 					$labelclass = 'class="has--label"';
 				}
 
-				$content .= '<fieldset role="group">';
+				$content .= '<fieldset role="radiogroup" aria-label="' . $field->label . '">';
+				$content .= '<legend class="sr-only" name="' . $field->label . '">' . $field->label . '</legend>';
 				// Loop through our choices.
 				foreach ( $field->choices as $choice ) {
 					// Output our choices as html.
 					$content .= '<label ' . $labelclass . ' ';
-					$content .= 'for="choice_' . $form_id . '_' . $field->id . '_' . $counter . '" '; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-					$content .= 'id="label_' . $form_id . '_' . $field->id . '_' . $counter . '">'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+					$content .= 'for="choice_' . $form_id . '_' . $field->id . '_' . $counter . '" '; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+					$content .= 'id="label_' . $form_id . '_' . $field->id . '_' . $counter . '">'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 					$content .= '<input name="input_' . $field->id . '" type="radio" ';
 					$content .= 'value="' . $choice['value'] . '" ';
-					$content .= 'id="choice_' . $form_id . '_' . $field->id . '_' . $counter . '" '; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+					$content .= 'id="choice_' . $form_id . '_' . $field->id . '_' . $counter . '" '; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 					$content .= 'tabindex="1">' . $choice['text'] . '</label>';
 					// Increase our counter.
 					$counter++;
 				}
 				$content .= '</fieldset>';
 				break;
+			case 'consent':
+			case 'checkbox':
+				return str_replace( 'aria-required="true"', 'required', $field_content );
 			default:
 				return $field_content;
 		}
 
 		// If field has a description, then lets show it.
 		if ( $field->description ) {
-			$content .= '<span class="form__description" aria-hidden="true">' . $field->description . '</span>';
+			$content .= '<span class="form__description" id="' . $name . '_desc" aria-hidden="true">' . $field->description . '</span>';
 		}
 
 		// Return the individual fields/inputs.
@@ -260,76 +276,20 @@ class Gf_Nus_Markup {
 		// Setup how our field_id is displayed.
 		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
 
-		// Create our new <li>.
 		return '<li id="' . $field_id . '" class="' . $custom_classes . '">{FIELD_CONTENT}</li>';
-	}
-
-	/**
-	 * Remove Gravity Forms stylesheets and unnecessary scripts
-	 *
-	 * Gets rid of the nasty default css by removing the stylesheet and the datalist chosen JS.
-	 */
-	public function dequeue_gf_scripts() {
-		if ( ! is_admin() ) {
-			wp_dequeue_style( 'gforms_formsmain_css' );
-			wp_dequeue_style( 'gforms_browsers_css' );
-			wp_dequeue_script( 'gform_chosen' );
-		}
 	}
 
 	/**
 	 * Update failed form submission message
 	 *
 	 * Adds aria-alert so screen readers will know something bad happened on failed submit
-	 */
-	public function change_fail_message( $message, $form ) {
-		$new_message = '';
-
-		return $new_message;
-	}
-
-	public function form_tag( $form_tag, $form ) {
-		$form_tag .= '<div role="alert" aria-atomic="true" class="validation_error"></div>';
-
-		return $form_tag;
-	}
-
-	/**
-	 * Populate oh_date hidden field
 	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_location( $value ) {
-		$location      = get_post_meta( get_the_ID(), 'location_select', true );
-		$location_city = get_post_meta( $location, 'city', true );
-
-		return $location_city;
-	}
-
-	/**
-	 * Populate oh_date hidden field
+	 * @param string $message The originally set up error message.
 	 *
-	 * Populates the hidden field with the event start date selected in the admin
+	 * @return string
 	 */
-	public function populate_date( $value ) {
-		$meta = get_post_meta( get_the_ID() );
-		if ( ! empty( $meta['event_details_start_time'][0] ) ) {
-			$start = DateTime::createFromFormat( 'U', $meta['event_details_start_time'][0] );
-			$start->setTimezone( new DateTimeZone( 'America/Los_Angeles' ) );
-			$event_date = $start->format( 'm/d/Y' );
-		}
-		return $event_date;
-	}
-
-	/**
-	 * Populate oh_track hidden field
-	 *
-	 * Populates the hidden field with the event start date selected in the admin
-	 */
-	public function populate_track( $value ) {
-		$location      = get_post_meta( get_the_ID(), 'location_select', true );
-		$location_city = get_post_meta( $location, 'city', true );
-		return 'eo-openhouse-' . str_replace( ' ', '-', strtolower( $location_city ) );
+	public function change_fail_message( $message ) {
+		return str_replace( ' class', ' role="alert" aria-atomic="true" class', $message );
 	}
 
 	/**
@@ -337,6 +297,7 @@ class Gf_Nus_Markup {
 	 * This will populate the field only if the option to populate dynamically is checked.
 	 *
 	 * @param string $value Value passed into the hook.
+	 *
 	 * @return string
 	 */
 	public function populate_form_id( $value ) {

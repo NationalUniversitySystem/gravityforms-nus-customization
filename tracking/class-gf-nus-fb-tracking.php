@@ -20,6 +20,7 @@ class Gf_Nus_Fb_Tracking {
 	public function __construct() {
 		add_action( 'wp_head', [ $this, 'add_pixel_base_code' ] );
 		add_action( 'wp_footer', [ $this, 'add_fb_pixel_to_footer' ] );
+		add_action( 'wp_footer', [ $this, 'add_completed_application_pixel' ] );
 		// add_filter( 'gform_confirmation', [ $this, 'add_fb_pixel_to_confirmation' ], 10, 4 );
 		add_filter( 'gform_field_value_fbtrack', [ $this, 'populate_fbtrack' ] );
 	}
@@ -57,23 +58,40 @@ class Gf_Nus_Fb_Tracking {
 		$add_on         = Gf_Nus_Addon::get_instance();
 		$this->settings = $add_on->get_plugin_settings();
 
-		// Check if the settings and parameters we need are defined (all of them).
+		// Check if the settings we need are defined (all of them).
 		if (
 			empty( $this->settings['fb_tracking_enabled'] )
-			|| empty( $this->settings['fb_tracking_thank_you_page_ids'] )
 			|| empty( $this->settings['fb_pixel_id'] )
-			|| empty( $_GET['entry_id'] )
-			|| empty( $_GET['fbtrack'] )
+			|| (
+				empty( $this->settings['fb_tracking_thank_you_page_ids'] )
+				&& empty( $this->settings['fb_tracking_completed_app_thank_you_page_ids'] )
+			)
 		) {
 			return;
 		}
 
-		$this->pages_ids = array_filter( array_map( 'intval', explode( ',', $this->settings['fb_tracking_thank_you_page_ids'] ) ) );
+		// Check if the parameters we need are defined.
+		if ( empty( $_GET['oa2type'] ) && empty( $_GET['entry_id'] ) && empty( $_GET['fbtrack'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		$this->thank_you_pages     = [];
+		$this->completed_app_pages = [];
+		$this->pages_ids           = [];
+
+		if ( ! empty( $this->settings['fb_tracking_thank_you_page_ids'] ) ) {
+			$this->thank_you_pages = array_filter( array_map( 'intval', explode( ',', $this->settings['fb_tracking_thank_you_page_ids'] ) ) );
+		}
+
+		if ( ! empty( $this->settings['fb_tracking_completed_app_thank_you_page_ids'] ) ) {
+			$this->completed_app_pages = array_filter( array_map( 'intval', explode( ',', $this->settings['fb_tracking_completed_app_thank_you_page_ids'] ) ) );
+		}
+
+		$this->pages_ids = array_merge( $this->thank_you_pages, $this->completed_app_pages );
 
 		if ( ! is_page( $this->pages_ids ) ) {
 			return;
 		}
-
 		?>
 
 		<!-- Facebook Pixel Code -->
@@ -95,7 +113,7 @@ class Gf_Nus_Fb_Tracking {
 	 * @return void
 	 */
 	public function add_fb_pixel_to_footer() {
-		// Check that our class and methods to fetch settings exist.
+		// Avoid admins.
 		if ( current_user_can( 'install_plugins' ) ) {
 			return;
 		}
@@ -105,8 +123,8 @@ class Gf_Nus_Fb_Tracking {
 			empty( $this->settings['fb_tracking_enabled'] )
 			|| empty( $this->settings['fb_tracking_thank_you_page_ids'] )
 			|| empty( $this->settings['fb_pixel_id'] )
-			|| empty( $_GET['entry_id'] )
-			|| empty( $_GET['fbtrack'] )
+			|| empty( $_GET['entry_id'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			|| empty( $_GET['fbtrack'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		) {
 			return;
 		}
@@ -117,18 +135,72 @@ class Gf_Nus_Fb_Tracking {
 			return;
 		}
 
-		$entry_id = sanitize_text_field( wp_unslash( $_GET['entry_id'] ) );
+		$entry_id = sanitize_text_field( wp_unslash( $_GET['entry_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$entry    = GFAPI::get_entry( $entry_id );
 		$form     = ! empty( $entry['form_id'] ) ? GFAPI::get_form( $entry['form_id'] ) : null;
 
 		$code = $this->get_pixel_code( $this->settings['fb_pixel_id'], $form, $entry );
 
 		printf(
-			'<script>%s</script>',
+			'<script>%s</script>' . "\n",
 			$code // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
 	}
 
+	/**
+	 * Display the FB pixel code for the landing page(s) of completed applications.
+	 *
+	 * @return void
+	 */
+	public function add_completed_application_pixel() {
+		// Avoid admins.
+		if ( current_user_can( 'install_plugins' ) ) {
+			return;
+		}
+
+		// Check if the settings we need are defined (all of them).
+		if (
+			empty( $this->settings['fb_tracking_enabled'] )
+			|| empty( $this->settings['fb_pixel_id'] )
+			|| empty( $this->settings['fb_tracking_completed_app_thank_you_page_ids'] )
+			|| empty( $_GET['oa2type'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		) {
+			return;
+		}
+
+		$application_type = sanitize_text_field( wp_unslash( $_GET['oa2type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		$this->pages_ids = array_filter( array_map( 'intval', explode( ',', $this->settings['fb_tracking_completed_app_thank_you_page_ids'] ) ) );
+
+		if ( ! is_page( $this->pages_ids ) ) {
+			return;
+		}
+
+		$tracking_code_string = 'fbq("init", "%s");
+		fbq("track", "PageView");
+		fbq("track", "Purchase", {
+			content_name: "%s"
+		});';
+
+		$code = sprintf(
+			$tracking_code_string,
+			$this->settings['fb_pixel_id'],
+			$application_type
+		);
+
+		printf(
+			'<script>%s</script>' . "\n",
+			$code // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		);
+	}
+
+	/**
+	 * Dynamically populate the Gravity Forms "fbtrack" field
+	 *
+	 * @param string $value Existing value for the field.
+	 *
+	 * @return string
+	 */
 	public function populate_fbtrack( $value ) {
 		$add_on         = Gf_Nus_Addon::get_instance();
 		$this->settings = $add_on->get_plugin_settings();
@@ -272,7 +344,7 @@ class Gf_Nus_Fb_Tracking {
 		}
 
 		// If for any reason the degree type is empty (e.g. "Area" marketing landing pages).
-		if ( empty( $object['content_type'] ) ) {
+		if ( empty( $object['content_type'] ) && ! empty( $program_object->ID ) ) {
 			$degree_types = get_the_terms( $program_object->ID, 'degree-type' );
 			if ( ! empty( $program_areas[0] ) ) {
 				$object['content_type'] = $degree_types[0]->slug;

@@ -31,10 +31,4 @@
 			}
 		} );
 	}
-
-	// Set the country
-	$( '.country--select select' ).val( 'USA' ).change();
-
-	// Set the country code AFTER we add the on change behavior so it actually triggers.
-	$( '.country-code--select select' ).val( '1' ).change();
 } )( document, jQuery );

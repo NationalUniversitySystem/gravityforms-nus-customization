@@ -22,11 +22,11 @@ class Nu_Phone_Field extends GF_Field_Text {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_action( 'gform_addon_pre_process_feeds', array( $this, 'stop_spam' ), 10, 3 );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
-		add_filter( 'gform_field_validation', array( $this, 'validate_field' ), 10, 4 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_action( 'gform_addon_pre_process_feeds', [ $this, 'stop_spam' ], 10, 3 );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
+		add_filter( 'gform_field_validation', [ $this, 'validate_field' ], 10, 4 );
 	}
 
 	/**
@@ -35,7 +35,19 @@ class Nu_Phone_Field extends GF_Field_Text {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Phone', 'national-university' );
+		return esc_attr__( 'Phone', 'national-university' );
+	}
+
+	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
 	}
 
 	/**
@@ -69,9 +81,9 @@ class Nu_Phone_Field extends GF_Field_Text {
 			// Make sure this field type exists.
 			if ( false !== $nu_phone_field_id ) {
 				$nu_phone_value  = rgpost( 'input_' . $nu_phone_field_id );
-				$blocked_numbers = array(
+				$blocked_numbers = [
 					'5551212',
-				);
+				];
 
 				foreach ( $blocked_numbers as $blocked_number ) {
 					if ( false !== strpos( $nu_phone_value, $blocked_number ) ) {
@@ -113,15 +125,15 @@ class Nu_Phone_Field extends GF_Field_Text {
 		$aria_desc = '';
 
 		// If field is set to require in admin add our required html so Gravity Forms knows what to do.
-		$required_aria = ( true === $field->isRequired ) ? 'aria-required="true"' : 'aria-required="false"'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_attr = ( true === $field->isRequired ) ? ' required' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// Get our input ID to use throughout.
 		$name = 'input_' . esc_attr( $field->id );
 
 		if ( $field->description ) {
 			// If field has a description FOR SCREEN READERS.
-			$content .= '<span class="form__description sr-only" id="' . $name . '_desc">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
+			$content .= '<span class="form__description sr-only">Instructions for ' . $field->label . ' input: ' . $field->description . '</span>';
 			// If field has a description, use it as the aria description as well.
 			$aria_desc = ' aria-describedby="' . $name . '_desc"';
 		}
@@ -130,16 +142,17 @@ class Nu_Phone_Field extends GF_Field_Text {
 
 		$content .= '<input' . $aria_desc . '';
 		$content .= ' class="input input--text input--styled"';
-		$content .= ' type="text" ';
-		$content .= 'name="' . $name . '"' . $required_aria . ' ';
-		$content .= 'value="' . esc_attr( $value ) . '" ';
-		$content .= 'id="input_' . $form_id . '_' . $field->id . '"';
+		$content .= ' type="text"';
+		$content .= ' name="' . $name . '"';
+		$content .= $required_attr;
+		$content .= ' value="' . esc_attr( $value ) . '"';
+		$content .= ' id="input_' . $form_id . '_' . $field->id . '"';
 		$content .= ' autocomplete="tel">';
 
 		// If field has a description.
 		if ( $field->description ) {
 			// Then lets show it.
-			$content .= '<span class="form__description" aria-hidden="true">' . $field->description . '</span>';
+			$content .= '<span class="form__description" id="' . $name . '_desc" aria-hidden="true">' . $field->description . '</span>';
 		}
 
 		return $content;
@@ -191,7 +204,9 @@ class Nu_Phone_Field extends GF_Field_Text {
 	 * @param object $field  The GForm field information.
 	 */
 	public function validate_field( $result, $value, $form, $field ) {
-		if ( 'nu_phone' === $field->type || 'field__phone-number' === $field->cssClass ) {
+		$field_classes = explode( ' ', $field->cssClass ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+		if ( 'nu_phone' === $field->type || in_array( 'nus-live-validation--phone-strict', $field_classes, true ) ) {
 			/**
 			 * A few things are happening here:
 			 * - If there is no country-code field, we are assuming this is only for USA and should match 10 digits.
@@ -219,6 +234,23 @@ class Nu_Phone_Field extends GF_Field_Text {
 			// Decide if a specific message should be used.
 			if ( false === $result['is_valid'] && preg_match( '/[^0-9]/', $value ) ) {
 				$result['message'] = 'No special characters allowed';
+			}
+		} elseif ( in_array( 'nus-live-validation--phone', $field_classes, true ) ) {
+			// Get the country code if available.
+			$country_code_id    = $this->get_field_id( $form, 'country-code' );
+			$country_code_value = rgpost( 'input_' . $country_code_id ); // Returns empty string if the ID didn't exist.
+
+			if ( false === $country_code_id || '1' === $country_code_value ) {
+				$regex         = '/^(\+?1-?)?(\([2-9]([02-9]\d|1[02-9])\)|[2-9]([02-9]\d|1[02-9]))-?[2-9]([02-9]\d|1[02-9])-?\d{4}$/';
+				$error_message = 'Only 10 digits, hyphens, and spaces';
+			} else {
+				$regex         = '/^(\+?1-?)?(\([2-9]([02-9]\d|1[02-9])\)|[2-9]([02-9]\d|1[02-9]))-?[2-9]([02-9]\d|1[02-9])-?\d{4,15}$/';
+				$error_message = 'Only digits, hyphens, and spaces';
+			}
+
+			if ( empty( $value ) || ! preg_match( $regex, $value ) ) {
+				$result['is_valid'] = false;
+				$result['message']  = $error_message;
 			}
 		}
 

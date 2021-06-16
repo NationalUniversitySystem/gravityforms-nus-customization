@@ -1,0 +1,8 @@
+.gfield_consent_description {
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.gfield_consent_description.consent__below-submit {
+  margin-top: 30px;
+}

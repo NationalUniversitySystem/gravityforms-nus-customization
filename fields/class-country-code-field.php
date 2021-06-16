@@ -28,9 +28,10 @@ class Country_Code_Field extends GF_Field_Select {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
 		add_action( 'gform_pre_submission', 'Country_Code_Field::add_country_to_webhooks', 10, 1 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
+		add_filter( 'gform_field_choice_markup_pre_render', [ $this, 'add_data_to_choices' ], 10, 4 );
 	}
 
 	/**
@@ -43,15 +44,15 @@ class Country_Code_Field extends GF_Field_Select {
 	}
 
 	/**
-	 * Assign the field button to the Advanced Fields group.
+	 * Assign the field button to the Custom Fields group.
 	 *
 	 * @return array
 	 */
 	public function get_form_editor_button() {
-		return array(
-			'group' => 'standard_fields',
+		return [
+			'group' => 'nu_fields',
 			'text'  => $this->get_form_editor_field_title(),
-		);
+		];
 	}
 
 	/**
@@ -60,7 +61,7 @@ class Country_Code_Field extends GF_Field_Select {
 	 * @return array
 	 */
 	public function get_form_editor_field_settings() {
-		return array(
+		return [
 			'conditional_logic_field_setting',
 			'prepopulate_field_setting',
 			'error_message_setting',
@@ -77,7 +78,7 @@ class Country_Code_Field extends GF_Field_Select {
 			'duplicate_setting',
 			'description_setting',
 			'css_class_setting',
-		);
+		];
 	}
 
 	/**
@@ -111,7 +112,7 @@ class Country_Code_Field extends GF_Field_Select {
 		$class              = $size . $class_suffix;
 		$css_class          = trim( esc_attr( $class ) . ' input input--select input--styled' );
 		$disabled_text      = $is_form_editor ? 'disabled="disabled"' : '';
-		$required_attribute = $this->isRequired ? 'aria-required="true"' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_attribute = $this->isRequired ? 'required' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$invalid_attribute  = $this->failed_validation ? 'aria-invalid="true"' : 'aria-invalid="false"';
 
 		return sprintf(
@@ -124,49 +125,6 @@ class Country_Code_Field extends GF_Field_Select {
 			$invalid_attribute,
 			$this->get_choices( $value )
 		);
-	}
-
-	/**
-	 * Fetch the choices for the countries
-	 *
-	 * @param string $selected_country The selected country value, if any.
-	 *
-	 * @return string
-	 */
-	public function get_choices( $selected_country ) {
-		$choices          = '';
-		$selected_country = strtolower( $selected_country );
-		$countries        = array_merge( array( '' ), $this->get_country_codes() );
-		foreach ( $countries as $country_data ) {
-			$country_name  = ! empty( $country_data['country_name'] ) ? $country_data['country_name'] : '';
-			$dialing_code  = ! empty( $country_data['dialing_code'] ) ? $country_data['dialing_code'] : '';
-			$country_code  = ! empty( $country_data['iso_country_code'] ) ? esc_attr( $country_data['iso_country_code'] ) : '';
-			$country_code  = '' !== $country_code ? ' data-iso-country-code="' . $country_code . '"' : '';
-			$name_data     = '' !== $country_name ? ' data-country-name="' . $country_name . '"' : '';
-			$country_label = $country_name;
-
-			if ( is_numeric( $country_name ) ) {
-				$country_name = $dialing_code;
-			}
-			if ( empty( $dialing_code ) ) {
-				$country_name = ''; // Placeholder.
-			}
-			if ( '' !== $country_name ) {
-				$country_label .= ' (+' . $dialing_code . ')';
-			}
-
-			$selected = strtolower( $country_name ) === $selected_country ? ' selected="selected"' : '';
-			$choices .= sprintf(
-				'<option value="%s"%s%s%s>%s</option>' . "\n",
-				esc_attr( $dialing_code ),
-				$country_code,
-				$selected,
-				$name_data,
-				esc_html( $country_label )
-			);
-		}
-
-		return $choices;
 	}
 
 	/**
@@ -1486,7 +1444,7 @@ class Country_Code_Field extends GF_Field_Select {
 		$is_admin        = $is_form_editor || $is_entry_detail;
 		$required_class  = $is_admin ? 'gfield_required' : 'required-label';
 
-		$required_div = $is_admin || $this->isRequired ? sprintf( "<span class='%s'>%s</span>", $required_class, $this->isRequired ? '*' : '' ) : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_div = $is_admin || $this->isRequired ? sprintf( "<span class='%s'>%s</span>", $required_class, $this->isRequired ? '*' : '' ) : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		$admin_buttons = $this->get_admin_buttons();
 
@@ -1582,40 +1540,61 @@ class Country_Code_Field extends GF_Field_Select {
 	}
 
 	/**
-	 * Add default classes to input containers
+	 * Add custom class(es) to field
 	 *
-	 * Setup some default styling so manual entry isn't necessary
+	 * @param string $css_classes Class list for the field container.
+	 * @param object $field       The GF field object with info.
+	 * @param array  $form        The current GF form data.
 	 *
-	 * @param string $field_container The field container's markup.
-	 * @param object $field           The GF field object with info.
-	 * @param array  $form            The current GF form data.
-	 * @param string $css_class       Class list for the field container.
-	 * @param string $style           Style attribute text.
-	 * @param string $field_content   Full field content, including the label.
+	 * @return string
 	 */
-	public static function custom_field_container( $field_container, $field, $form, $css_class, $style, $field_content ) {
-		if ( 'country-code' !== $field->type ) {
-			return $field_container;
+	public function modify_field_container_classes( $css_classes, $field, $form ) {
+		// If is in the admin or not this field type, leave it be.
+		if ( is_admin() || $this->type !== $field->type ) {
+			return $css_classes;
 		}
 
-		// Get the ID of our field.
-		$id = $field->id;
+		$css_classes .= ' country-code--select';
 
-		// Empty content variable.
-		$custom_classes = '';
+		// If any of the choices is selected, add the active class for label display.
+		$choices_is_selected = array_filter( array_column( $field->choices, 'isSelected' ) );
 
-		// If we have a description, set our class as such.
-		if ( ! empty( $field->description ) ) {
-			$custom_classes .= 'has-desc ';
+		if ( ! empty( $choices_is_selected ) ) {
+			$css_classes .= ' form__group--active';
 		}
 
-		$custom_classes .= 'country-code--select';
+		return $css_classes;
+	}
 
-		// Setup how our field_id is displayed.
-		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
+	/**
+	 * Add the data attributes to each country choice markup.
+	 *
+	 * @param string $choice_markup The markup for the field including the wrapping <li>, label, and input (if it has not been altered from the native markup).
+	 * @param array  $choice        Array of options pertaining to the specific choice, including text, value, and isSelected.
+	 * @param object $field         The full Gravity Form field pertaining to the choice option.
+	 * @param string $value         Value of the option.
+	 *
+	 * @return string
+	 */
+	public function add_data_to_choices( $choice_markup, $choice, $field, $value ) {
+		if ( is_admin() || $this->type !== $field->type ) {
+			return $choice_markup;
+		}
 
-		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="form__group ' . $custom_classes . ' ' . $css_class . '">{FIELD_CONTENT}</li>';
+		foreach ( $this->get_country_codes() as $country ) {
+			if ( $choice['value'] === $country['dialing_code'] && false !== strpos( $choice['text'], $country['country_name'] ) ) {
+				if ( ! empty( $country['iso_country_code'] ) ) {
+					$choice_markup = str_replace( ' value=', ' data-iso-country-code="' . $country['iso_country_code'] . '" value=', $choice_markup );
+				}
+
+				if ( ! empty( $country['country_name'] ) ) {
+					$choice_markup = str_replace( ' value=', ' data-country-name="' . $country['country_name'] . '" value=', $choice_markup );
+				}
+
+			}
+		}
+
+		return $choice_markup;
 	}
 
 	/**

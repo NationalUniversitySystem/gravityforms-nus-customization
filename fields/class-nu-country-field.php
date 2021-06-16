@@ -22,9 +22,9 @@ class Nu_Country_Field extends GF_Field_Select {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_css_class', [ $this, 'modify_field_container_classes' ], 10, 3 );
 	}
 
 	/**
@@ -33,7 +33,19 @@ class Nu_Country_Field extends GF_Field_Select {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Country', 'national-university' );
+		return esc_attr__( 'Country', 'national-university' );
+	}
+
+	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
 	}
 
 	/**
@@ -50,7 +62,7 @@ class Nu_Country_Field extends GF_Field_Select {
 				<?php
 				// Create our array of countries.
 				// Note: keys are currently not used.
-				$countries = array(
+				$countries = [
 					'AF' => 'Afghanistan',
 					'AL' => 'Albania',
 					'DZ' => 'Algeria',
@@ -257,7 +269,8 @@ class Nu_Country_Field extends GF_Field_Select {
 					'YE' => 'Yemen',
 					'ZM' => 'Zambia',
 					'ZW' => 'Zimbabwe',
-				);
+				];
+
 				foreach ( $countries as $country ) {
 					?>
 					new Choice("<?php echo esc_html( $country ); ?>"),
@@ -289,8 +302,8 @@ class Nu_Country_Field extends GF_Field_Select {
 		$content = '';
 
 		// If field is set to require in admin add our required html so Gravity Forms knows what to do.
-		$required_aria = ( true === $field->isRequired ) ? 'aria-required="true"' : 'aria-required="false"'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required_attr = ( true === $field->isRequired ) ? ' required' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$required      = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// Get our input ID to use throughout.
 		$name = 'input_' . esc_attr( $field->id );
@@ -301,7 +314,7 @@ class Nu_Country_Field extends GF_Field_Select {
 		}
 
 		// Create our variable to store our <options>.
-		$choices = '<option value="" selected disabled="disabled"></option>';
+		$choices = '<option value="" label=" " selected disabled="disabled"></option>';
 		// If the field has choices, loop through them.
 		if ( $field->choices ) {
 			// Go through all the possible choices assigned to the select in the admin.
@@ -314,12 +327,11 @@ class Nu_Country_Field extends GF_Field_Select {
 
 		$content .= '<label class="form__label" for="input_' . $form_id . '_' . $field->id . '">' . $field->label . $required . '</label>';
 
-		if ( ! $field->enableEnhancedUI ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		if ( ! $field->enableEnhancedUI ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			$content .= '<select ';
 			$content .= 'class="input input--select input--styled" ';
 			$content .= 'name="' . $name . '" ';
-			$content .= $required_aria;
-			$content .= ' value="' . esc_attr( $value );
+			$content .= $required_attr;
 			$content .= '" id="input_' . $form_id . '_' . $field->id . '">';
 			$content .= $choices;
 			$content .= '</select>';
@@ -329,7 +341,7 @@ class Nu_Country_Field extends GF_Field_Select {
 				'input_' . $form_id . '_' . $field->id . '-list',
 				'input_' . $form_id . '_' . $field->id,
 				$name,
-				$required_aria
+				$required_attr
 			);
 			$content .= '<datalist id="input_' . $form_id . '_' . $field->id . '-list" >';
 			$content .= $choices;
@@ -346,39 +358,20 @@ class Nu_Country_Field extends GF_Field_Select {
 	}
 
 	/**
-	 * Add default classes to input containers
+	 * Add custom class(es) to field
 	 *
-	 * Setup some default styling so manual entry isn't necessary
+	 * @param string $css_classes Class list for the field container.
+	 * @param object $field       The GF field object with info.
+	 * @param array  $form        The current GF form data.
 	 *
-	 * @param string $field_container The field container's markup.
-	 * @param object $field           The GF field object with info.
-	 * @param array  $form            The current GF form data.
-	 * @param string $css_class       Class list for the field container.
-	 * @param string $style           Style attribute text.
-	 * @param string $field_content   Full field content, including the label.
+	 * @return string
 	 */
-	public static function custom_field_container( $field_container, $field, $form, $css_class, $style, $field_content ) {
-		if ( 'nu_country' !== $field->type ) {
-			return $field_container;
+	public function modify_field_container_classes( $css_classes, $field, $form ) {
+		// If is in the admin or not this field type, leave it be.
+		if ( is_admin() || $this->type !== $field->type ) {
+			return $css_classes;
 		}
 
-		// Get the ID of our field.
-		$id = $field->id;
-
-		// Empty content variable.
-		$custom_classes = '';
-
-		// If we have a description, set our class as such.
-		if ( ! empty( $field->description ) ) {
-			$custom_classes .= 'has-desc ';
-		}
-
-		$custom_classes .= 'country--select';
-
-		// Setup how our field_id is displayed.
-		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";
-
-		// Create our new <li>.
-		return '<li id="' . $field_id . '" class="form__group ' . $custom_classes . ' ' . $css_class . '">{FIELD_CONTENT}</li>';
+		return $css_classes .= ' country--select';
 	}
 }

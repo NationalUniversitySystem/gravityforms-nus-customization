@@ -1,0 +1,10 @@
+.gfield_consent_description { // stylelint-disable-line selector-class-pattern
+  font-size: 11px;
+  line-height: 18px;
+
+  &.consent {
+    &__below-submit {
+      margin-top: 30px;
+    }
+  }
+}

@@ -34,9 +34,9 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_content', array( $this, 'custom_html' ), 10, 5 );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_content', [ $this, 'custom_html' ], 10, 5 );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
 	/**
@@ -45,7 +45,19 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU GDPR', 'national-university' );
+		return esc_attr__( 'GDPR (deprecated)', 'national-university' );
+	}
+
+	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
 	}
 
 	/**
@@ -54,7 +66,7 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 	 * @return array
 	 */
 	public function get_form_editor_field_settings() {
-		return array(
+		return [
 			'conditional_logic_field_setting',
 			'error_message_setting',
 			'label_setting',
@@ -66,7 +78,7 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 			'placeholder_setting',
 			'description_setting',
 			'css_class_setting',
-		);
+		];
 	}
 
 	/**
@@ -110,7 +122,7 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 		$content = null;
 
 		// If field is set to require in admin add our required html so Gravity Forms knows what to do.
-		$required = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$required = ( true === $field->isRequired ) ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// Get our input ID to use throughout.
 		$name = 'input_' . esc_attr( $field->id );
@@ -118,10 +130,10 @@ class Gdpr_Field_Compatibility extends GF_Field_Checkbox {
 		// Define the html for our input's label.
 		$content = '<label class="form__label--checkbox" for="choice_' . $form_id . '_' . $field->id . '_1">';
 		// Define the html for the input itself.
-		$content .= '<input type="checkbox" ';
-		$content .= 'class="input input--checkbox input--gdpr"';
-		$content .= 'name="' . $name . '"  value="optIn" ';
-		$content .= 'id="choice_' . $form_id . '_' . $field->id . '_1">';
+		$content .= '<input type="checkbox"';
+		$content .= ' class="input input--checkbox input--gdpr"';
+		$content .= ' name="' . $name . '"  value="optIn"';
+		$content .= ' id="choice_' . $form_id . '_' . $field->id . '_1">';
 		$content .= $field->choices[0]['value'] . $required;
 		$content .= '</label>';
 

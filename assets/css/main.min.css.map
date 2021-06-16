@@ -1,0 +1,1 @@
+{"version":3,"sources":["components/_consent.scss"],"names":[],"mappings":"AAAA,4BACE,UAAA,KACA,YAAA,KAFF,kDAMM,WAAA","file":"main.min.css","sourcesContent":[".gfield_consent_description { // stylelint-disable-line selector-class-pattern\n  font-size: 11px;\n  line-height: 18px;\n\n  &.consent {\n    &__below-submit {\n      margin-top: 30px;\n    }\n  }\n}\n"]}

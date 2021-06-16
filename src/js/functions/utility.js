@@ -1,8 +1,5 @@
 /* eslint-disable no-unused-vars */
-/**
- * Utility Classes
- */
- function hasClass( el, className ) {
+function hasClass( el, className ) {
 	return el.classList ? el.classList.contains( className ) : new RegExp( '\\b' + className + '\\b' ).test( el.className );
 }
 
@@ -28,7 +25,7 @@ function removeClass( el, className ) {
  * Loops through all fields and checks for value, if value, sets form field to active via class
  */
 function setActiveClass() {
-	var fieldWrappers = document.querySelectorAll( '.gform_fields li' );
+	var fieldWrappers = document.querySelectorAll( '.gform_fields li:not(.col-wrapper)' );
 
 	fieldWrappers.forEach( function( element ) {
 		var fieldInput = element.querySelector( 'input' );

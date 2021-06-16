@@ -23,8 +23,8 @@ class Military_Field extends GF_Field_Checkbox {
 	 * Register hooks.
 	 */
 	public function add_hooks() {
-		add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-		add_filter( 'gform_field_container', array( $this, 'custom_field_container' ), 10, 99 );
+		add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 	}
 
 	/**
@@ -33,7 +33,19 @@ class Military_Field extends GF_Field_Checkbox {
 	 * @return string
 	 */
 	public function get_form_editor_field_title() {
-		return esc_attr__( 'NU Military', 'national-university' );
+		return esc_attr__( 'Military', 'national-university' );
+	}
+
+	/**
+	 * Assign the field button to the Custom Fields group.
+	 *
+	 * @return array
+	 */
+	public function get_form_editor_button() {
+		return [
+			'group' => 'nu_fields',
+			'text'  => $this->get_form_editor_field_title(),
+		];
 	}
 
 	/**
@@ -85,9 +97,8 @@ class Military_Field extends GF_Field_Checkbox {
 		}
 
 		$custom_classes .= 'form__group--military form__group--tooltip';
-
-		$tooltip  = '<span data-tool="#military-tooltip" class="icon icon--question-circle"></span>';
-		$tooltip .= '<div class="tooltip" id="military-tooltip">Check this box if you are active duty, veteran, guard, reserve, or a spouse/dependent</div>';
+		$tooltip_text    = 'es' === get_locale() ? 'Marque esta casilla si se encuentra en servicio activo, veterano, guardia, reserva o cónyuge/dependiente.' : 'Check this box if you are active duty, veteran, guard, reserve, or a spouse/dependent';
+		$tooltip         = '<span tabindex="0" data-tool="#military-tooltip" data-placement="top" data-toggle="tooltip" title="' . $tooltip_text . '"><span class="sr-only">' . $tooltip_text . '</span><span class="icon icon--question-circle" aria-hidden="true"></span></span>';
 
 		// Setup how our field_id is displayed.
 		$field_id = is_admin() || empty( $form ) ? "field_{$id}" : 'field_' . $form['id'] . "_$id";

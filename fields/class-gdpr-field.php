@@ -28,9 +28,9 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 * Register hooks.
 		 */
 		public function add_hooks() {
-			add_filter( 'gform_field_css_class', array( $this, 'custom_container_class' ), 10, 3 );
-			add_action( 'gform_editor_js_set_default_values', array( $this, 'set_default_values' ) );
-			add_filter( 'gform_field_validation', array( $this, 'validate_field' ), 10, 4 );
+			add_filter( 'gform_field_css_class', [ $this, 'custom_container_class' ], 10, 3 );
+			add_action( 'gform_editor_js_set_default_values', [ $this, 'set_default_values' ] );
+			add_filter( 'gform_field_validation', [ $this, 'validate_field' ], 10, 4 );
 		}
 
 		/**
@@ -39,19 +39,19 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 * @return string
 		 */
 		public function get_form_editor_field_title() {
-			return esc_attr__( 'NU GDPR', 'national-university' );
+			return esc_attr__( 'GDPR', 'national-university' );
 		}
 
 		/**
-		 * Assign the field button to the Advanced Fields group.
+		 * Assign the field button to the Custom Fields group.
 		 *
 		 * @return array
 		 */
 		public function get_form_editor_button() {
-			return array(
-				'group' => 'standard_fields',
+			return [
+				'group' => 'nu_fields',
 				'text'  => $this->get_form_editor_field_title(),
-			);
+			];
 		}
 
 		/**
@@ -65,7 +65,7 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 		 *
 		 * @return string
 		 */
-		public function get_field_input( $form, $value = array(), $entry = null ) {
+		public function get_field_input( $form, $value = [], $entry = null ) {
 			// Determine if this is an ancient incompatible entry/field.
 			$incompatible_field = false;
 			if ( empty( $this->inputs ) && ! empty( $this->choices[0] ) && ! empty( $this->choices[0]['text'] ) ) {
@@ -80,34 +80,34 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 
 			$id                 = (int) $this->id;
 			$disabled_text      = $is_form_editor ? 'disabled="disabled"' : '';
-			$required_attribute = $this->isRequired ? 'aria-required="true"' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			$required_attribute = $this->isRequired ? 'required' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			$invalid_attribute  = $this->failed_validation ? 'aria-invalid="true"' : 'aria-invalid="false"';
 
 			$target_input_id       = GF_Field::get_first_input_id( $form );
 			$for_attribute         = empty( $target_input_id ) ? '' : "for='{$target_input_id}'";
 			$label_class_attribute = $is_admin ? 'class="gfield_consent_label"' : 'class="form__label--checkbox"';
 
-			if ( $is_admin && 'hidden_label' === $this->labelPlacement ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-				$required_div = sprintf( "<span class='gfield_required'>%s</span>", $this->isRequired ? '*' : '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			if ( $is_admin && 'hidden_label' === $this->labelPlacement ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				$required_div = sprintf( "<span class='gfield_required'>%s</span>", $this->isRequired ? '*' : '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			} else {
-				$required_div = $this->isRequired ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+				$required_div = $this->isRequired ? '<span class="required-label">*</span>' : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			}
 
 			if ( $is_admin && ! GFCommon::is_entry_detail_edit() ) {
-				$checkbox_label = ! is_array( $value ) || empty( $value[ $id . '.2' ] ) ? $this->checkboxLabel : $value[ $id . '.2' ]; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+				$checkbox_label = ! is_array( $value ) || empty( $value[ $id . '.2' ] ) ? $this->checkboxLabel : $value[ $id . '.2' ]; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				$checkbox_label = ! $incompatible_field ? $checkbox_label : $this->choices[0]['text'];
 				$revision_id    = ! is_array( $value ) || empty( $value[ $id . '.3' ] ) ? GFFormsModel::get_latest_form_revisions_id( $form['id'] ) : $value[ $id . '.3' ];
 				$value          = ! is_array( $value ) || empty( $value[ $id . '.1' ] ) ? '0' : esc_attr( $value[ $id . '.1' ] );
 			} else {
 				// Backwards compatibility until all our fields have been updated.
-				$checkbox_label = ! $incompatible_field ? $this->checkboxLabel : $this->choices[0]['text']; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+				$checkbox_label = ! $incompatible_field ? $this->checkboxLabel : $this->choices[0]['text']; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 				$revision_id = GFFormsModel::get_latest_form_revisions_id( $form['id'] );
 				// We compare if the description text from different revisions has been changed.
 				$current_description   = $this->get_field_description_from_revision( $revision_id );
 				$submitted_description = ! $incompatible_field ? $this->get_field_description_from_revision( $value[ $id . '.3' ] ) : '';
 
-				$value = ! is_array( $value ) || empty( $value[ $id . '.1' ] ) || ( $this->checkboxLabel !== $value[ $id . '.2' ] ) || ( $current_description !== $submitted_description ) ? '0' : esc_attr( $value[ $id . '.1' ] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+				$value = ! is_array( $value ) || empty( $value[ $id . '.1' ] ) || ( $this->checkboxLabel !== $value[ $id . '.2' ] ) || ( $current_description !== $submitted_description ) ? '0' : esc_attr( $value[ $id . '.1' ] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			}
 			$checked = $is_form_editor ? '' : checked( '1', $value, false );
 
@@ -125,10 +125,10 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 			} else {
 				// Old setup so that the value passes through to validation correctly.
 				$input  = '<label class="form__label--checkbox" for="choice_' . $form['id'] . '_' . $this->id . '_1">';
-				$input .= '<input type="checkbox" ';
-				$input .= 'class="' . $input_classes . '"';
-				$input .= 'name="input_' . esc_attr( $this->id ) . '"  value="optIn" ';
-				$input .= 'id="choice_' . $form['id'] . '_' . $this->id . '_1">';
+				$input .= '<input type="checkbox"';
+				$input .= ' class="' . $input_classes . '"';
+				$input .= ' name="input_' . esc_attr( $this->id ) . '"  value="optIn"';
+				$input .= ' id="choice_' . $form['id'] . '_' . $this->id . '_1">';
 				$input .= $this->choices[0]['value'] . $required_div;
 				$input .= '</label>';
 			}
@@ -164,7 +164,7 @@ if ( class_exists( 'GF_Field_Consent' ) ) {
 			$is_admin        = $is_form_editor || $is_entry_detail;
 			$required_class  = $is_admin ? 'gfield_required' : 'required-label';
 
-			$required_div = $is_admin || $this->isRequired ? sprintf( "<span class='%s'>%s</span>", $required_class, $this->isRequired ? '*' : '' ) : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			$required_div = $is_admin || $this->isRequired ? sprintf( "<span class='%s'>%s</span>", $required_class, $this->isRequired ? '*' : '' ) : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 			$admin_buttons = $this->get_admin_buttons();
 

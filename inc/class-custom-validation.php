@@ -1,5 +1,11 @@
 <?php
+/**
+ * Manage custom Gravityforms validation for our forms
+ */
 
+/**
+ * Custom_Validation class
+ */
 class Custom_Validation {
 	/**
 	 * Instance of this class
@@ -12,8 +18,11 @@ class Custom_Validation {
 	 * Use class construct method to define all filters & actions
 	 */
 	public function __construct() {
-		add_filter( 'gform_field_validation', array( $this, 'validate_text_field' ), 10, 4 );
-		add_action( 'gform_addon_pre_process_feeds', array( $this, 'halt_fake_email' ), 10, 3 );
+		add_filter( 'gform_field_validation', [ $this, 'validate_text_field' ], 10, 4 );
+		add_action( 'gform_addon_pre_process_feeds', [ $this, 'halt_fake_email' ], 10, 3 );
+
+		add_action( 'wp_ajax_zip_lookup', [ $this, 'zip_lookup' ] );
+		add_action( 'wp_ajax_nopriv_zip_lookup', [ $this, 'zip_lookup' ] );
 	}
 
 	/**
@@ -59,25 +68,68 @@ class Custom_Validation {
 	 * @return mixed An array of $feeds or kill the process.
 	 */
 	public function halt_fake_email( $feeds, $entry, $form ) {
-		// Get the value of our email field.
-		$email = $this->get_value_by_label( $form, $entry, 'Email Address' );
-		// Remove any whitespace.
-		$email = trim( $email );
 		// Get our settings from the GF admin page.
 		$add_on   = Gf_Nus_Addon::get_instance();
 		$settings = $add_on->get_plugin_settings();
+
+		if ( empty( $settings['blocked_domains'] ) ) {
+			return $feeds;
+		}
+
 		// Make an array from our csv values via admin settings.
-		$blocked_domains = explode( ',', $settings['blocked_domains'] );
-		// Run through each value in the array.
-		foreach ( $blocked_domains as $blocked_domain ) {
-			// If the value of the email field matches the value in our blocked domains array.
-			if ( strpos( $email, $blocked_domain ) !== false ) {
-				// Still submit to WordPress and show thank you page, but don't perform webhook (sneaky).
-				return array();
+		$blocked_domains = array_filter( explode( ',', $settings['blocked_domains'] ) );
+
+		$email = $this->get_value_by_label( $form, $entry, 'Email Address' );
+		$email = trim( $email );
+
+		if ( ! empty( $blocked_domains ) && ! empty( $email ) ) {
+			// Run through each value in the array.
+			foreach ( $blocked_domains as $blocked_domain ) {
+				// If the value of the email field matches the value in our blocked domains array.
+				if ( false !== strpos( $email, $blocked_domain ) ) {
+					// Still submit to WordPress and show thank you page, but don't perform webhook (sneaky).
+					return [];
+				}
 			}
 		}
-		// Otherwise, run as normal.
+
 		return $feeds;
+	}
+
+	/**
+	 * Check for data corresponding to the zipcode
+	 *
+	 * Note: "wp_send_json_error" and "wp_send_json_success" print and then die
+	 * so no need for the else statement (nor an extra die call).
+	 *
+	 * @return void
+	 */
+	public function zip_lookup() {
+		// Make sure the value is in the request.
+		if ( empty( $_POST['zipValue'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			wp_send_json_error( 'No zipcode provided.' );
+		}
+
+		global $wpdb;
+
+		$zip_value = sanitize_text_field( wp_unslash( $_POST['zipValue'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$result    = $wpdb->get_row( $wpdb->prepare( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			'SELECT * FROM `%1$s` WHERE zipcode = %2$s', // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
+			'wp_zip_data', // Table is top level (not site ID dependent) so not using the wpdb->prefix concatenation.
+			$zip_value
+		), ARRAY_A );
+
+		// If the zipcode was actually not found (the table only stores actual existing zipcodes).
+		if ( ! $result ) {
+			wp_send_json_error( 'The zipcode was not found.' );
+		}
+
+		// If the result didn't have state data.
+		if ( empty( $result['state'] ) ) {
+			wp_send_json_error( 'Invalid zipcode provided.' );
+		}
+
+		wp_send_json_success( $result );
 	}
 
 	/**

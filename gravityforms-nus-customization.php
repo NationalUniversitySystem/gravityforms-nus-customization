@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gravity Forms - NUS Customization
  * Description: Plugin that customizes and expands GF to NUS specifications.
- * Version: 1.2.1
+ * Version: 2.0.0
  * Author: Chris Maust / Mike Estrada
  *
  * @package gravityforms-nus-customization
@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Define a few constants we'll need.
-define( 'GF_NUS_VER', '1.2.1' );
+define( 'GF_NUS_VER', '2.0.0' );
 define( 'GF_NUS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'GF_NUS_URL', plugin_dir_url( __FILE__ ) );
 
@@ -33,14 +33,16 @@ function gf_nus_load() {
 		return;
 	}
 
-	$files_list = array(
+	$files_list = [
 		'tracking/class-gf-nus-fb-tracking.php',
+		'inc/class-consent-expansion.php',
 		'inc/class-custom-validation.php',
-		'inc/class-gf-nus-javascript.php',
+		'inc/class-gf-nus-assets.php',
 		'inc/class-gf-nus-markup.php',
 		'inc/class-gf-nus-security.php',
+		'inc/class-multi-language-support.php',
 		'inc/class-national-university-gravityforms.php',
-	);
+	];
 
 	foreach ( $files_list as $filename ) {
 		if ( file_exists( GF_NUS_PATH . $filename ) ) {
@@ -53,7 +55,7 @@ function gf_nus_load() {
 				$class_name::singleton();
 
 				if ( method_exists( $class_name, 'activate' ) ) {
-					register_activation_hook( __FILE__, array( $class_name, 'activate' ) );
+					register_activation_hook( __FILE__, [ $class_name, 'activate' ] );
 				}
 			}
 		}

@@ -176,7 +176,7 @@ class Gf_Nus_Addon extends GFAddOn {
 	 * @return array
 	 */
 	public function tooltips( $tooltips ) {
-		$addon_tooltips = array();
+		$addon_tooltips = [];
 
 		foreach ( $this->class_names as $class_name ) {
 			if ( method_exists( $class_name, 'add_tooltip' ) ) {
@@ -240,6 +240,13 @@ class Gf_Nus_Addon extends GFAddOn {
 						],
 					],
 					[
+						'name'    => 'fb_pixel_id',
+						'type'    => 'text',
+						'class'   => 'small',
+						'label'   => esc_html__( 'Pixel ID', 'national-university' ),
+						'tooltip' => esc_html__( 'Get this from analytics team or FB yourself.', 'national-university' ),
+					],
+					[
 						'name'        => 'fb_tracking_thank_you_page_ids',
 						'type'        => 'text',
 						'class'       => 'medium',
@@ -256,11 +263,12 @@ class Gf_Nus_Addon extends GFAddOn {
 						'tooltip'     => esc_html__( 'The IDs of the forms we want to add the tracking pixel to.', 'national-university' ),
 					], */
 					[
-						'name'    => 'fb_pixel_id',
-						'type'    => 'text',
-						'class'   => 'small',
-						'label'   => esc_html__( 'Pixel ID', 'national-university' ),
-						'tooltip' => esc_html__( 'Get this from analytics team or FB yourself.', 'national-university' ),
+						'name'        => 'fb_tracking_completed_app_thank_you_page_ids',
+						'type'        => 'text',
+						'class'       => 'medium',
+						'label'       => esc_html__( 'Completed App Page IDs', 'national-university' ),
+						'description' => esc_html__( 'Comma delimited values.', 'national-university' ),
+						'tooltip'     => esc_html__( 'The IDs of the completed applications thank you pages we want to add the tracking pixel to.', 'national-university' ),
 					],
 				],
 			],
