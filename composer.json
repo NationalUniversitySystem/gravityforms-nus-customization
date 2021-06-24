@@ -2,6 +2,6 @@
   "name": "nationaluniversitysystem/gravityforms-nus-customization",
   "description": "Add-on/expansion of Gravity Forms with specific requirements for NUS/NEP.",
   "type": "wordpress-plugin",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "require": {}
 }
