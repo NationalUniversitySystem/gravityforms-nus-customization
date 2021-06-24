@@ -3,5 +3,10 @@
   "description": "Add-on/expansion of Gravity Forms with specific requirements for NUS/NEP.",
   "type": "wordpress-plugin",
   "version": "2.0.1",
-  "require": {}
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "NUSA\\GravityForms\\": "inc/"
+    }
+  }
 }

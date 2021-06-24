@@ -1,12 +1,13 @@
 <?php
 /**
  * Plugin Name: Gravity Forms - NUS Customization
- * Description: Plugin that customizes and expands GF to NUS specifications.
- * Version: 2.0.0
- * Author: Chris Maust / Mike Estrada
+ * Description: Plugin that customizes and expands Gravity Forms' functionality to NUS specifications.
+ * Version: 2.1.0
  *
  * @package gravityforms-nus-customization
  */
+
+namespace NUSA\GravityForms;
 
 if ( ! defined( 'WPINC' ) ) {
 	die( 'YOU! SHALL NOT! PASS!' );
@@ -17,31 +18,33 @@ define( 'GF_NUS_VER', '2.0.0' );
 define( 'GF_NUS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'GF_NUS_URL', plugin_dir_url( __FILE__ ) );
 
-// If Gravity Forms is loaded, load our files.
-add_action( 'gform_loaded', 'gf_nus_load' );
+if ( ! file_exists( plugin_dir_path( __FILE__ ) . '/vendor/autoload.php' ) ) {
+	die( 'Missing something...' );
+}
+
+require plugin_dir_path( __FILE__ ) . '/vendor/autoload.php';
 
 /**
- * Include most files in the include method and custom fields in the GForms Addon method.
+ * If Gravity Forms is loaded, include most files in the include method and custom fields in the GForms Addon method.
  * Naming convention:
  * - File: class-example-name.php
  * - Class: Example_Name
- *
- * Note: Might still rework this to an autoload class so it's cleaner.
  */
-function gf_nus_load() {
+add_action( 'gform_loaded', function() {
 	if ( ! method_exists( 'GFForms', 'include_addon_framework' ) ) {
 		return;
 	}
 
+	new Assets();
+	new Consent_Expansion();
+	new Custom_Validation();
+	new Custom_Markup();
+	new Metadata();
+	new Multi_Language_Support();
+	new Security();
+
 	$files_list = [
 		'tracking/class-gf-nus-fb-tracking.php',
-		'inc/class-consent-expansion.php',
-		'inc/class-custom-validation.php',
-		'inc/class-gf-nus-assets.php',
-		'inc/class-gf-nus-markup.php',
-		'inc/class-gf-nus-security.php',
-		'inc/class-multi-language-support.php',
-		'inc/class-national-university-gravityforms.php',
 	];
 
 	foreach ( $files_list as $filename ) {
@@ -64,6 +67,6 @@ function gf_nus_load() {
 	if ( file_exists( GF_NUS_PATH . 'class-gf-nus-addon.php' ) ) {
 		require_once GF_NUS_PATH . 'class-gf-nus-addon.php';
 
-		GFAddOn::register( 'Gf_Nus_Addon' );
+		\GFAddOn::register( 'Gf_Nus_Addon' );
 	}
-}
+} );

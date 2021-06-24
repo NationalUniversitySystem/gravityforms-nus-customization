@@ -3,17 +3,12 @@
  * Handle markup modifications
  */
 
-/**
- * Gf_Nus_Markup class
- */
-class Gf_Nus_Markup {
-	/**
-	 * Instance of this class
-	 *
-	 * @var boolean
-	 */
-	public static $instance = false;
+namespace NUSA\GravityForms;
 
+/**
+ * Custom_Markup class
+ */
+class Custom_Markup {
 	/**
 	 * Use class construct method to define all filters & actions
 	 */
@@ -25,19 +20,6 @@ class Gf_Nus_Markup {
 		add_filter( 'gform_field_container', [ $this, 'custom_field_container' ], 10, 6 );
 		add_filter( 'gform_validation_message', [ $this, 'change_fail_message' ] );
 		add_filter( 'gform_field_value_formID', [ $this, 'populate_form_id' ] );
-	}
-
-	/**
-	 * Singleton
-	 *
-	 * Returns a single instance of this class.
-	 */
-	public static function singleton() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**

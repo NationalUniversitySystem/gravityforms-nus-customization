@@ -3,17 +3,12 @@
  * Manage custom Gravityforms validation for our forms
  */
 
+namespace NUSA\GravityForms;
+
 /**
  * Custom_Validation class
  */
 class Custom_Validation {
-	/**
-	 * Instance of this class
-	 *
-	 * @var boolean
-	 */
-	public static $instance = false;
-
 	/**
 	 * Use class construct method to define all filters & actions
 	 */
@@ -23,19 +18,6 @@ class Custom_Validation {
 
 		add_action( 'wp_ajax_zip_lookup', [ $this, 'zip_lookup' ] );
 		add_action( 'wp_ajax_nopriv_zip_lookup', [ $this, 'zip_lookup' ] );
-	}
-
-	/**
-	 * Singleton
-	 *
-	 * Returns a single instance of this class.
-	 */
-	public static function singleton() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
@@ -69,7 +51,7 @@ class Custom_Validation {
 	 */
 	public function halt_fake_email( $feeds, $entry, $form ) {
 		// Get our settings from the GF admin page.
-		$add_on   = Gf_Nus_Addon::get_instance();
+		$add_on   = \Gf_Nus_Addon::get_instance();
 		$settings = $add_on->get_plugin_settings();
 
 		if ( empty( $settings['blocked_domains'] ) ) {

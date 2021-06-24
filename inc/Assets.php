@@ -3,17 +3,12 @@
  * Handle the plugin's Assets related functionality
  */
 
-/**
- * Gf_Nus_Assets class
- */
-class Gf_Nus_Assets {
-	/**
-	 * Instance of this class
-	 *
-	 * @var boolean
-	 */
-	public static $instance = false;
+namespace NUSA\GravityForms;
 
+/**
+ * Assets class
+ */
+class Assets {
 	/**
 	 * Use class construct method to define all filters & actions
 	 */
@@ -21,19 +16,6 @@ class Gf_Nus_Assets {
 		add_action( 'gform_enqueue_scripts', [ $this, 'dequeue_gf_scripts' ], 11 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ], 99 );
 		add_action( 'script_loader_tag', [ $this, 'do_script_loader_tag' ], 10, 2 );
-	}
-
-	/**
-	 * Singleton
-	 *
-	 * Returns a single instance of this class.
-	 */
-	public static function singleton() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**

@@ -3,19 +3,14 @@
  * Mod to expand the behavior of displaying the text box of the native Gravity Forms Consent field
  */
 
+namespace NUSA\GravityForms;
+
 // We'll be doing a whole lot of HTML manipulation.
 require GF_NUS_PATH . '/inc/vendor/simplehtmldom/simple_html_dom.php';
 /**
  * Consent_Expansion class
  */
 class Consent_Expansion {
-	/**
-	 * Instance of this class
-	 *
-	 * @var boolean
-	 */
-	public static $instance = false;
-
 	/**
 	 * Use class construct method to define all filters & actions
 	 */
@@ -25,19 +20,6 @@ class Consent_Expansion {
 		add_filter( 'gform_tooltips', [ $this, 'add_tooltip' ] );
 		add_filter( 'gform_field_content', [ $this, 'modify_field_content' ], 10, 5 );
 		add_filter( 'gform_submit_button', [ $this, 'add_consent_below_submit' ], 99, 2 );
-	}
-
-	/**
-	 * Singleton
-	 *
-	 * Returns a single instance of this class.
-	 */
-	public static function singleton() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**

@@ -3,35 +3,17 @@
  * Functionality for supporting multiple languages
  */
 
+namespace NUSA\GravityForms;
+
 /**
  * Multi_Language_Support class
  */
 class Multi_Language_Support {
 	/**
-	 * Instance of this class
-	 *
-	 * @var boolean
-	 */
-	public static $instance = false;
-
-	/**
 	 * Use class construct method to define all filters & actions
 	 */
 	public function __construct() {
 		add_filter( 'gform_pre_render', [ $this, 'split_translations' ] );
-	}
-
-	/**
-	 * Singleton
-	 *
-	 * Returns a single instance of this class.
-	 */
-	public static function singleton() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
