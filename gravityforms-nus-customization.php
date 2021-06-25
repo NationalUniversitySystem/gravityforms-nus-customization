@@ -42,6 +42,7 @@ add_action( 'gform_loaded', function() {
 	new Metadata();
 	new Multi_Language_Support();
 	new Security();
+	new Settings();
 
 	$files_list = [
 		'tracking/class-gf-nus-fb-tracking.php',
