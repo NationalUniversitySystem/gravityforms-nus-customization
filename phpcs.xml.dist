@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<ruleset name="NUSA-Gravityforms">
+	<description>Custom ruleset for NUSA\Gravityforms project</description>
+
+	<config name="error-severity" value="1" />
+	<config name="warning-severity" value="1" />
+
+	<exclude-pattern>/vendor/</exclude-pattern>
+	<exclude-pattern>/node_modules/</exclude-pattern>
+
+	<!-- Include the base WordPress ruleset -->
+	<rule ref="NUSA-WP"/>
+
+	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
+		<severity>0</severity>
+	</rule>
+
+	<!-- Disabling PHP class name files structure for our "app" since the plugin uses PSR-4 autoloading -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<severity>0</severity>
+	</rule>
+</ruleset>
