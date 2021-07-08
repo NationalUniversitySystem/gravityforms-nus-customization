@@ -14,8 +14,11 @@ import uglify from 'gulp-uglify';
 // CSS related plugins.
 import autoprefixer from 'gulp-autoprefixer';
 import cleanCSS from 'gulp-clean-css';
-import sass from 'gulp-sass';
 import styleLint from 'gulp-stylelint';
+import nodeSass from 'node-sass';
+import gulpSass from 'gulp-sass';
+
+const sass = gulpSass( nodeSass );
 
 // Utility related plugins.
 import del from 'del';
